@@ -54,6 +54,7 @@ Tidak ada spike yang otomatis dianggap PASS hanya karena kodenya ada di repo ata
 - `docs/contracts/08_VALIDATION_ERROR_CATALOG.md`
 - `docs/adr/0001-foundation-gate-before-production.md`
 - `docs/adr/0002-preserve-user-edits-on-rerun.md`
+- `docs/foundation-gate.json`
 - `docs/spike-results/S01-S03_BATCH_A.md`
 - `docs/spike-results/S04-S06_BATCH_B.md`
 - `docs/spike-results/S07-S08_BATCH_C.md`
@@ -123,6 +124,8 @@ Minimal harus dibuktikan pada Premiere nyata:
 
 S13–S16 boleh memiliki limitation yang tidak memblokir composer dasar, tetapi hasilnya harus dicatat.
 
+Gate juga **machine-enforced**. `docs/foundation-gate.json` saat ini berstatus `NO_GO_PENDING_RUNTIME_VERIFICATION`, dan `scripts/check-stage02-gate.mjs` akan membuat CI gagal bila source production seperti `src/` atau `packages/core` ditambahkan sebelum status gate secara eksplisit berubah menjadi `GO_APPROVED` setelah evidence nyata direview.
+
 ## Tahap 02 — sudah dirancang, belum diimplementasikan
 
 Blueprint production ada di `docs/03_STAGE_02_CORE_ARCHITECTURE_PRODUCTION_PLAN.md`, checklist eksekusi ASTRA → SOL ada di `docs/04_STAGE_02_EXECUTION_CHECKLIST_ASTRA_SOL.md`, dan kontrak production formal ada di `docs/contracts/`.
@@ -178,7 +181,8 @@ npm run check
 CI mengecek:
 - syntax `main.js`, `batch-c.js`, `batch-d.js`, `batch-e.js`, `verification.js`;
 - manifest foundation;
-- package readiness dasar.
+- package readiness dasar;
+- **Stage 02 gate guard** agar source production tidak masuk sebelum real-host approval.
 
 Static validation tidak menggantikan test Premiere/AME/CCX nyata.
 
@@ -186,6 +190,7 @@ Static validation tidak menggantikan test Premiere/AME/CCX nyata.
 
 1. Jalankan Foundation Verification Kit v0.0.6 di Windows/Premiere nyata.
 2. Review `aavc-foundation-report-*.json`.
-3. Jika gate GO → ubah Tahap 02 menjadi READY TO IMPLEMENT.
-4. Mulai **Batch P0 — Production TypeScript Skeleton** sesuai dokumen Tahap 02.
-5. Jika blocker gagal → perbaiki foundation terlebih dahulu dan jangan membuat workaround tersembunyi di production.
+3. Jika gate GO → ubah `docs/foundation-gate.json` menjadi `GO_APPROVED` dengan referensi evidence.
+4. Ubah Tahap 02 menjadi READY TO IMPLEMENT.
+5. Mulai **Batch P0 — Production TypeScript Skeleton** sesuai dokumen Tahap 02.
+6. Jika blocker gagal → perbaiki foundation terlebih dahulu dan jangan membuat workaround tersembunyi di production.
