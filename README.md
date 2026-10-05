@@ -1,120 +1,132 @@
 # AI Automatic Video Composer - Premiere
 
-Plugin Adobe Premiere Pro untuk menyusun video naratif/infografis secara otomatis dari **Scene DOCX + aset canonical `Axxx` + narasi + subtitle**, tetapi hasil akhirnya tetap berupa timeline Premiere yang dapat diedit manual.
+Plugin Adobe Premiere Pro untuk menyusun video naratif/infografis secara otomatis dari **Scene DOCX + aset canonical `Axxx` + narasi + subtitle**, dengan hasil akhir berupa timeline Premiere yang tetap bisa diedit manual.
 
 ## Status proyek
 
-**Fase saat ini: Tahap 00 selesai / Tahap 01 sedang berjalan / Batch A S01–S03, Batch B S04–S06, Batch C S07–S08, dan Batch D S09–S11 sudah diimplementasikan, tetapi belum diverifikasi di Premiere nyata.**
+**Tahap 00 selesai. Tahap 01 Foundation/API Spike: S01–S16 sudah IMPLEMENTED, tetapi belum VERIFIED penuh di Premiere nyata.**
 
-Repo memakai pola **implement → verify di host nyata → baru promote ke production architecture**. Kode probe tidak otomatis dianggap PASS hanya karena sudah ada di repo atau static check GitHub berhasil.
+Repo memakai aturan:
 
-Baseline teknis:
+`implement → static validate → verify di Premiere nyata → dokumentasikan limitation → baru promote ke production architecture`
+
+Tidak ada spike yang otomatis dianggap PASS hanya karena kodenya ada di repo atau GitHub Actions hijau.
+
+## Baseline
 
 - Premiere Pro **25.6+**
 - UXP Developer Tool **2.2+**
-- UXP Manifest **v5**
-- JavaScript UXP murni selama fase spike foundation
-- TypeScript production setelah API P0 terbukti
-- Windows 11 sebagai platform development pertama
-- Premiere/Adobe Media Encoder sebagai jalur timeline dan export utama
+- Manifest **v5**
+- Windows 11 sebagai environment development pertama
+- JavaScript UXP murni selama fase spike
+- TypeScript production setelah gate foundation lolos
+- Premiere/Adobe Media Encoder sebagai timeline + export utama
 
-## Goal utama
+## Goal
 
 `Scene DOCX + Folder Axxx + Narasi + SRT`
 
 → parse scene
 → bind aset
-→ tentukan SINGLE/DOUBLE layout
-→ susun clip pada V1/V2
-→ set durasi
+→ SINGLE/DOUBLE layout
+→ V1/V2 placement
+→ duration
 → motion/keyframe
 → subtitle
 → audio
-→ validasi
-→ timeline Premiere siap diedit
+→ validation
+→ timeline Premiere editable
 → export Premiere/AME
 
-## Dokumen wajib
+## Dokumen utama
 
-1. [`docs/00_MASTER_PLAN_AI_AUTOMATIC_VIDEO_COMPOSER_PREMIERE.md`](docs/00_MASTER_PLAN_AI_AUTOMATIC_VIDEO_COMPOSER_PREMIERE.md) — dokumen induk proyek.
-2. [`docs/01_UXP_FOUNDATION_API_SPIKE_PLAN.md`](docs/01_UXP_FOUNDATION_API_SPIKE_PLAN.md) — rencana pembuktian API sebelum engine production.
-3. [`docs/adr/README.md`](docs/adr/README.md) — aturan Architecture Decision Record.
-4. [`docs/spike-results/README.md`](docs/spike-results/README.md) — format hasil setiap API spike.
-5. [`docs/spike-results/S01-S03_BATCH_A.md`](docs/spike-results/S01-S03_BATCH_A.md) — record Batch A.
-6. [`docs/spike-results/S04-S06_BATCH_B.md`](docs/spike-results/S04-S06_BATCH_B.md) — record Batch B.
-7. [`docs/spike-results/S07-S08_BATCH_C.md`](docs/spike-results/S07-S08_BATCH_C.md) — record Batch C.
-8. [`docs/spike-results/S09-S11_BATCH_D.md`](docs/spike-results/S09-S11_BATCH_D.md) — record Batch D.
-9. [`uxp/README.md`](uxp/README.md) — cara load dan menguji plugin foundation.
+- `docs/00_MASTER_PLAN_AI_AUTOMATIC_VIDEO_COMPOSER_PREMIERE.md`
+- `docs/01_UXP_FOUNDATION_API_SPIKE_PLAN.md`
+- `docs/spike-results/S01-S03_BATCH_A.md`
+- `docs/spike-results/S04-S06_BATCH_B.md`
+- `docs/spike-results/S07-S08_BATCH_C.md`
+- `docs/spike-results/S09-S11_BATCH_D.md`
+- `docs/spike-results/S12-S16_BATCH_E.md`
+- `uxp/README.md`
 
 ## Foundation yang sudah diimplementasikan
 
 ### Batch A — S01–S03
-- **S01 Plugin Boot & Panel** — manifest v5, panel diagnostics, lifecycle/logging.
-- **S02 Host & Version Gate** — host, Premiere version, UXP version, OS, architecture, locale, minimum gate 25.6.
-- **S03 Filesystem Access** — PNG picker, folder picker, enumerasi `Axxx`, write/read persistent plugin-data JSON.
+- S01 Plugin Boot & Panel
+- S02 Host & Version Gate
+- S03 Filesystem Access + persistent plugin-data
 
 ### Batch B — S04–S06
-- **S04 Active Project** — membaca active project, root item, insertion bin, sequences, active sequence dan root children.
-- **S05 Bin + Import Media** — membuat/memakai bin `AAVC_GENERATED`, import dua canonical asset, readback sebagai ClipProjectItem, dan mengamati duplicate behavior.
-- **S06 Sequence Creation** — membuat `AAVC_SPIKE_S06` melalui `Project.createSequenceFromMedia()` dan membaca metadata sequence kembali.
+- S04 Active Project / Project Tree
+- S05 Dedicated bin `AAVC_GENERATED` + import `Axxx`
+- S06 Sequence Creation via `Project.createSequenceFromMedia()`
 
 ### Batch C — S07–S08
-- **S07 Timeline Placement** — sequence khusus `AAVC_SPIKE_S07_S08`, A001 di V1 @ 0 s, A002 di V2 @ 1 s, menggunakan `SequenceEditor.createInsertProjectItemAction()` dan DOM readback.
-- **S08 Timing & Duration** — A001 ditargetkan 3 s, A002 ditargetkan 5 s menggunakan `VideoClipTrackItem.createSetEndAction()` dalam satu transaction, lalu diverifikasi lewat `getStartTime()`, `getEndTime()`, dan `getDuration()` dengan toleransi maksimum 1 frame.
+- S07 A001 → V1 @ 0s, A002 → V2 @ 1s
+- S08 duration A001=3s, A002=5s, toleransi ≤ 1 frame
 
 ### Batch D — S09–S11
-- **S09 Motion Parameter Discovery** — enumerate seluruh video component/parameter A001, baca component `matchName`, parameter display/value/keyframe capability, cari kandidat Motion/Position/Scale/Opacity, lalu static mutation + readback + restore pada numeric candidate yang aman.
-- **S10 Native Keyframe Animation** — enable time-varying, tambah dua keyframe pada 0 s dan 2 s, set LINEAR interpolation bila tersedia, lalu verifikasi lewat keyframe list dan value readback. Transaction success saja tidak dianggap bukti.
-- **S11 Transaction & One Undo** — dua perubahan timing dimasukkan ke satu `executeTransaction()`. Setelah satu Ctrl+Z manual di Premiere, tombol Verify wajib membuktikan kedua state kembali ke baseline.
+- S09 Motion/Position/Scale/Opacity discovery
+- S10 native keyframe @ 0s + 2s + DOM readback
+- S11 dua mutation dalam satu transaction + verifikasi satu Ctrl+Z
 
-Semua Action dibuat di dalam `Project.lockedAccess()` dan dieksekusi lewat `Project.executeTransaction()` sesuai aturan API Premiere terbaru.
+### Batch E — S12–S16
+- S12 persistent Project/Sequence Properties + GUID backup JSON untuk rerun identity
+- S13 network permission GET/POST dengan allowlist foundation-only `https://httpbin.org`
+- S14 EncoderManager / queue sequence ke Adobe Media Encoder dengan `.epr`
+- S15 MOGRT insertion via `SequenceEditor.insertMogrtFromPath()` + component inspection
+- S16 package-readiness static check + prosedur manual UDT → `.ccx` → install → smoke test
 
-`createSequenceWithPresetPath()` tidak menjadi dependency MVP karena baru tersedia mulai Premiere 26.3; baseline menggunakan API yang tersedia sejak 25.6.
+## Gate sebelum Tahap 02
 
-## Cara test
+**Jangan mulai Core Architecture production hanya berdasarkan static check.**
 
-1. Gunakan **project TEST**, bukan project produksi.
-2. Buka Premiere Pro 25.6+.
-3. Buka UXP Developer Tool 2.2+.
-4. Add Plugin → pilih `uxp/manifest.json`.
-5. Load plugin.
-6. Premiere → `Window > UXP Plugins > AI Automatic Video Composer`.
-7. Jalankan S01 → S02 → ... → S11 secara berurutan.
-8. Pada S11, setelah mutation berhasil, tekan **Ctrl+Z satu kali** tanpa edit lain lalu klik `Verify S11 Undo`.
-9. Isi hasil nyata di `docs/spike-results/`.
+Minimal harus dibuktikan pada Premiere nyata:
 
-S05–S11 memodifikasi project test; beberapa probe merestore nilainya sendiri, tetapi jangan gunakan project produksi.
+1. S07 — placement benar.
+2. S08 — timing/duration presisi.
+3. S10 — keyframe benar-benar muncul pada DOM/timeline atau limitation terdokumentasi dalam ADR.
+4. S11 — dua mutation dapat dibalik dengan satu Undo.
+5. S12 — identity tetap dikenali setelah reload/restart.
 
-## Prinsip implementasi
+S13–S16 boleh memiliki limitation yang tidak memblokir composer dasar, tetapi hasilnya harus dicatat.
 
-- Jangan menyalin Python/PySide/FFmpeg dari AAVC standalone 1:1.
-- Port **logika bisnis**, lalu implementasikan integrasi dengan API native Premiere UXP.
-- API yang hanya terlihat di dokumentasi belum dianggap aman sampai dibuktikan dengan spike pada Premiere nyata.
-- Operasi yang menghasilkan Action harus mengikuti `lockedAccess` / transaction rules.
-- Jangan merusak edit manual user saat plugin dijalankan ulang.
-- Gemini/AI adalah fitur opsional; composer dasar harus tetap bekerja tanpa internet.
-- Fitur Premiere 26.x/27.x harus di-version-gate dan tidak boleh diam-diam menaikkan minimum MVP 25.6.
-- Parameter Motion tidak boleh bergantung pada satu English display name; simpan inventory host/locale dan gunakan capability/shape/matchName evidence.
+## Cara test foundation
 
-## Gate Tahap 01
+1. Gunakan project TEST.
+2. Premiere 25.6+ → enable Developer Mode.
+3. UXP Developer Tool 2.2+ → Add Plugin → `uxp/manifest.json`.
+4. Load plugin.
+5. Premiere → Window → UXP Plugins → AI Automatic Video Composer.
+6. Jalankan S01 → S16 sesuai `uxp/README.md`.
+7. Isi result sheet di `docs/spike-results/`.
 
-Tiga kemampuan berikut adalah blocker utama sebelum parser DOCX/composer production dibuat:
+## Security / permission note
 
-- **S07 — Timeline Placement**
-- **S08 — Timing & Duration**
-- **S11 — Transaction & Undo**
+Domain `https://httpbin.org` hanya dipakai untuk S13 foundation. **Sebelum production release domain ini harus dihapus** dan diganti allowlist provider yang benar. API key tidak boleh masuk source, log, atau repo.
 
-S10 juga harus PASS bila motion/keyframe native dijadikan bagian wajib MVP. Bila host mengalami bug keyframe tetapi S07/S08/S11 stabil, composer MVP dapat dilanjutkan tanpa motion native sementara dan motion dibuat capability-gated.
+## Static validation
 
-## Workflow agen
+```bash
+npm run check
+```
 
-- **ASTRA / planner:** memecah pekerjaan, menilai hasil spike, membuat ADR, menjaga scope dan acceptance criteria.
-- **SOL / implementer:** membangun kode, menjalankan spike, membuat test/log/result, dan hanya membawa API yang sudah terbukti ke adapter production.
+CI mengecek:
+- syntax `main.js`, `batch-c.js`, `batch-d.js`, `batch-e.js`;
+- manifest foundation;
+- package readiness dasar.
+
+Static validation tidak menggantikan test Premiere/AME/CCX nyata.
 
 ## Langkah berikutnya
 
-Setelah Batch D diverifikasi pada Premiere nyata, lanjutkan Tahap 01:
+Setelah Tahap 01 diverifikasi, masuk **Tahap 02 — Core Architecture Production**:
 
-**S12 Identity / Rerun Safety → S13 Network Permission → S14 Encoder Export → S15 MOGRT/Graphics → S16 Packaging CCX.**
-
-Jangan mulai parser DOCX production sebelum blocker S07/S08/S11 mempunyai jalur yang terbukti.
+- TypeScript foundation;
+- Premiere adapter layer;
+- project/composer state;
+- Scene DOCX parser;
+- `Axxx` binder;
+- deterministic timeline composer;
+- validation + rerun safety;
+- baru kemudian motion registry, subtitle, Gemini, dan export workflow.
