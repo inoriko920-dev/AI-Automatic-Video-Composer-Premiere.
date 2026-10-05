@@ -1,0 +1,39 @@
+{
+  "fixtureVersion": 1,
+  "fixtureId": "F-DOCX-01",
+  "expectedSceneCount": 3,
+  "scenes": [
+    {
+      "ordinal": 1,
+      "title": "Pembukaan",
+      "narrationText": "Kota itu mulai berubah ketika matahari terbit.",
+      "assetIds": ["A001"],
+      "layoutHint": "SINGLE",
+      "durationHintSeconds": 3
+    },
+    {
+      "ordinal": 2,
+      "title": "Jalan Utama",
+      "narrationText": "Aktivitas perlahan memenuhi jalan utama.",
+      "assetIds": ["A002"],
+      "layoutHint": "SINGLE",
+      "durationHintSeconds": 4
+    },
+    {
+      "ordinal": 3,
+      "title": "Penutup",
+      "narrationText": "Hari pertama berakhir dengan suasana yang lebih tenang.",
+      "assetIds": ["A003"],
+      "layoutHint": "SINGLE",
+      "durationHintSeconds": 5
+    }
+  ],
+  "issues": [],
+  "assertions": {
+    "sceneIdsAreNonEmpty": true,
+    "sceneIdsMatchPattern": "^SCN-[0-9]{3}-[a-f0-9]+$",
+    "sceneIdsStableAcrossRepeatedParse": true,
+    "sourceFingerprintStableAcrossRepeatedParse": true,
+    "assetOrderPreserved": true
+  }
+}
