@@ -46,6 +46,7 @@ Tidak ada spike yang otomatis dianggap PASS hanya karena kodenya ada di repo ata
 - `docs/01_UXP_FOUNDATION_API_SPIKE_PLAN.md`
 - `docs/02_FOUNDATION_VERIFICATION_RUNBOOK.md`
 - `docs/03_STAGE_02_CORE_ARCHITECTURE_PRODUCTION_PLAN.md`
+- `docs/04_STAGE_02_EXECUTION_CHECKLIST_ASTRA_SOL.md`
 - `docs/adr/0001-foundation-gate-before-production.md`
 - `docs/spike-results/S01-S03_BATCH_A.md`
 - `docs/spike-results/S04-S06_BATCH_B.md`
@@ -118,7 +119,7 @@ S13–S16 boleh memiliki limitation yang tidak memblokir composer dasar, tetapi 
 
 ## Tahap 02 — sudah dirancang, belum diimplementasikan
 
-Blueprint production ada di `docs/03_STAGE_02_CORE_ARCHITECTURE_PRODUCTION_PLAN.md`.
+Blueprint production ada di `docs/03_STAGE_02_CORE_ARCHITECTURE_PRODUCTION_PLAN.md`, dan checklist eksekusi ASTRA → SOL ada di `docs/04_STAGE_02_EXECUTION_CHECKLIST_ASTRA_SOL.md`.
 
 Desain tersebut sudah mengunci:
 - TypeScript strict + production build layer;
@@ -135,7 +136,7 @@ Desain tersebut sudah mengunci:
 - idempotent rerun + three-way user-edit protection;
 - Validation Center error codes;
 - fixture F01–F10;
-- implementasi Batch P0–P8.
+- implementasi Batch P0–P8 dengan acceptance per batch.
 
 Status resmi Tahap 02 tetap:
 
