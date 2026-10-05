@@ -11,6 +11,9 @@ Dokumen ini adalah checklist eksekusi setelah `docs/03_STAGE_02_CORE_ARCHITECTUR
 ASTRA harus memeriksa:
 
 - [ ] tersedia `aavc-foundation-report-*.json` dari Premiere nyata;
+- [ ] tersedia `foundation-review.json` dari `scripts/review-foundation-report.mjs`;
+- [ ] SHA-256 source report tercatat di review;
+- [ ] reviewer menghasilkan `GO_CANDIDATE` atau `GO_CANDIDATE_WITH_S10_FALLBACK`;
 - [ ] S07 PASS;
 - [ ] S08 PASS;
 - [ ] S11 PASS;
@@ -19,13 +22,22 @@ ASTRA harus memeriksa:
 - [ ] versi Premiere/UXP/Windows tercatat;
 - [ ] limitation S13–S16 tercatat;
 - [ ] `npm run check` foundation hijau;
+- [ ] `docs/foundation-gate.json.status == GO_APPROVED`;
+- [ ] `evidenceReport` pada gate menunjuk evidence yang direview;
 - [ ] tidak ada perubahan production yang belum direview.
 
 Jika salah satu blocker belum selesai → **STOP / NO-GO**.
 
 ---
 
-# Batch P0 — Production Skeleton
+# Batch P0 — Production Skeleton + Dependency Proof
+
+## Referensi wajib
+
+- `docs/05_STAGE_02_DEPENDENCY_FEASIBILITY_MATRIX.md`
+- `docs/adr/0003-docx-parser-and-production-toolchain-candidates.md`
+
+ADR-0003 masih `PROPOSED` sampai proof P0 selesai.
 
 ## ASTRA plan
 
@@ -37,21 +49,59 @@ Output plan wajib:
 - lint/format config;
 - separation spike vs production;
 - CI commands;
-- no secret policy.
+- no secret policy;
+- host-module externals policy;
+- dependency version/license audit;
+- UXP bundle/load proof;
+- DOCX ZIP/XML micro-proof.
+
+## Candidate stack yang harus diuji
+
+- TypeScript strict;
+- `@adobe/premierepro` dev-only typings;
+- Rollup candidate utama;
+- `fflate` ZIP candidate;
+- `fast-xml-parser` XML candidate;
+- Vanilla HTML/CSS + Spectrum UXP widgets;
+- built-in `fetch` untuk provider optional;
+- `premierepro`, `uxp`, `fs`, `os` tetap external runtime modules.
+
+Candidate tidak boleh diganti diam-diam. Jika proof gagal, catat evidence lalu revisi ADR.
 
 ## SOL implement
 
 Checklist:
-- [ ] `src/` production dibuat;
+- [ ] `src/` production dibuat setelah gate GO;
 - [ ] `tsconfig.json` strict;
 - [ ] bundler UXP compatible;
+- [ ] host modules ditandai external;
 - [ ] `npm run typecheck`;
 - [ ] `npm run lint`;
 - [ ] `npm test`;
 - [ ] `npm run build`;
 - [ ] production panel minimal dapat load;
 - [ ] spike S01–S16 tetap utuh;
-- [ ] tidak ada `premierepro` import di domain.
+- [ ] tidak ada `premierepro` import di domain;
+- [ ] dependency lockfile committed;
+- [ ] licenses dependency dicatat;
+- [ ] no CDN runtime;
+- [ ] no native postinstall dependency.
+
+## Dependency proof P0
+
+- [ ] bundle load di UDT/Premiere nyata;
+- [ ] host info readback bekerja dari production bundle;
+- [ ] user memilih satu DOCX fixture melalui UXP filesystem;
+- [ ] DOCX dibaca sebagai bytes/`Uint8Array`;
+- [ ] `fflate` membuka archive;
+- [ ] `word/document.xml` ditemukan tanpa extract seluruh ZIP ke disk;
+- [ ] `fast-xml-parser` membaca XML;
+- [ ] paragraph/run order yang dibutuhkan kontrak Scene tetap tersedia;
+- [ ] satu normalized Scene dapat dihasilkan tanpa Premiere DOM dependency;
+- [ ] pure parser test dapat berjalan di Node;
+- [ ] packaged CCX smoke-load production skeleton berhasil.
+
+Setelah seluruh proof di atas PASS, ADR-0003 boleh diubah menjadi `ACCEPTED` dengan exact dependency versions.
 
 ### Exit P0
 
@@ -59,6 +109,9 @@ Checklist:
 CHECK + TYPECHECK + TEST + BUILD = PASS
 PRODUCTION EMPTY PANEL = LOADS
 SPIKE FOUNDATION = STILL AVAILABLE
+DOCX ZIP/XML MICRO-PROOF = PASS IN UXP
+HOST MODULES = EXTERNAL
+ADR-0003 = ACCEPTED
 ```
 
 ---
@@ -97,36 +150,44 @@ Pure domain tests PASS tanpa Premiere.
 
 # Batch P2 — DOCX Parser
 
-## ASTRA
-Sebelum SOL coding, pilih library ZIP/XML melalui micro-spike.
+Dependency ZIP/XML **tidak dipilih ulang** di P2. Gunakan dependency yang sudah lolos P0 dan telah dikunci oleh ADR-0003.
 
-Kriteria:
-- UXP bundlable;
-- Node-testable;
-- license aman;
-- no unsupported Node runtime dependency.
+## ASTRA
+
+Sebelum SOL coding:
+- baca `05_SCENE_DOCX_INPUT_CONTRACT.md`;
+- baca ADR-0003 final;
+- kunci mapping Word Open XML → paragraph/run → Scene grammar;
+- tentukan threshold sync/async unzip berdasarkan benchmark awal;
+- jangan memperluas parser menjadi general-purpose DOCX renderer.
 
 ## SOL
 - [ ] DOCX bytes reader;
 - [ ] ZIP extraction abstraction;
+- [ ] selective Open XML entry extraction;
 - [ ] Word XML reader;
-- [ ] paragraph/table tokenization;
+- [ ] paragraph/table tokenization bila kontrak membutuhkan table;
 - [ ] Prompt-1 recognizer;
 - [ ] scene block mapper;
 - [ ] Scene normalization;
 - [ ] source fingerprint;
-- [ ] structured errors.
+- [ ] structured errors;
+- [ ] no embedded macro/object execution;
+- [ ] no disk extraction seluruh DOCX.
 
 ### Fixtures
 - [ ] valid 1 scene;
 - [ ] valid multi-scene;
 - [ ] malformed DOCX;
+- [ ] corrupt ZIP;
+- [ ] missing `word/document.xml`;
 - [ ] unsupported structure;
 - [ ] duplicate scene ID;
-- [ ] missing asset reference.
+- [ ] missing asset reference;
+- [ ] whitespace/run fragmentation case.
 
 ### Exit P2
-Known DOCX fixture → deterministic `Scene[]`.
+Known DOCX fixture → deterministic `Scene[]` dengan hasil sama di Node test dan UXP adapter path.
 
 ---
 
@@ -329,6 +390,7 @@ ASTRA hanya boleh menyatakan COMPLETE bila:
 - [ ] real-host critical fixtures PASS;
 - [ ] no Gemini dependency;
 - [ ] no FFmpeg core dependency;
+- [ ] dependency/toolchain ADR accepted from real-host proof;
 - [ ] ADR updated untuk setiap architectural deviation.
 
 ---
@@ -360,4 +422,4 @@ SOL tidak boleh diberi instruksi generik seperti "lanjutkan aplikasi" untuk batc
 
 **JANGAN JALANKAN P0.**
 
-Tunggu Foundation Verification Report dan perubahan status `READY TO PLAN / NOT READY TO IMPLEMENT` menjadi `READY TO IMPLEMENT`.
+Tunggu Foundation Verification Report, deterministic evidence review, `docs/foundation-gate.json = GO_APPROVED`, lalu ubah status `READY TO PLAN / NOT READY TO IMPLEMENT` menjadi `READY TO IMPLEMENT`.
