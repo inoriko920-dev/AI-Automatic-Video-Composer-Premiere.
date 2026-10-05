@@ -10,7 +10,7 @@ Foundation test build saat ini: **v0.0.6**.
 
 Repo memakai aturan:
 
-`implement spike → static validate → verify di Premiere nyata → dokumentasikan limitation → baru promote ke production architecture`
+`implement spike → static validate → verify di Premiere nyata → review evidence → dokumentasikan limitation → baru promote ke production architecture`
 
 Tidak ada spike yang otomatis dianggap PASS hanya karena kodenya ada di repo atau GitHub Actions hijau.
 
@@ -52,9 +52,11 @@ Tidak ada spike yang otomatis dianggap PASS hanya karena kodenya ada di repo ata
 - `docs/contracts/06_AXXX_ASSET_BINDER_CONTRACT.md`
 - `docs/contracts/07_COMPOSER_PLAN_PROJECT_STATE_SCHEMA.md`
 - `docs/contracts/08_VALIDATION_ERROR_CATALOG.md`
+- `docs/contracts/09_FOUNDATION_REPORT_REVIEW_CONTRACT.md`
 - `docs/adr/0001-foundation-gate-before-production.md`
 - `docs/adr/0002-preserve-user-edits-on-rerun.md`
 - `docs/foundation-gate.json`
+- `docs/evidence/README.md`
 - `docs/spike-results/S01-S03_BATCH_A.md`
 - `docs/spike-results/S04-S06_BATCH_B.md`
 - `docs/spike-results/S07-S08_BATCH_C.md`
@@ -98,6 +100,7 @@ Untuk mengurangi setup manual, repo menyediakan:
 - `scripts/windows/START_FOUNDATION_VERIFICATION.cmd`
 - `scripts/windows/New-AAVCFoundationFixture.ps1`
 - `scripts/windows/Collect-AAVCFoundationEnvironment.ps1`
+- `scripts/windows/REVIEW_FOUNDATION_REPORT.cmd`
 
 Double-click `START_FOUNDATION_VERIFICATION.cmd` dari clone repo. Tool ini akan:
 
@@ -108,11 +111,34 @@ Double-click `START_FOUNDATION_VERIFICATION.cmd` dari clone repo. Tool ini akan:
 
 Folder `.aavc-foundation-test/` masuk `.gitignore` agar hasil test lokal tidak ikut ter-commit.
 
-Panel v0.0.6 juga memiliki **Verification Report exporter**. Setelah S01–S16 dijalankan, pilih `.aavc-foundation-test/results` lalu klik `Export Full Report`. Plugin menyimpan JSON lengkap dan TXT summary serta menghitung gate `GO_CANDIDATE` / `NO_GO` berdasarkan spike P0.
+Panel v0.0.6 juga memiliki **Verification Report exporter**. Setelah S01–S16 dijalankan, pilih `.aavc-foundation-test/results` lalu klik `Export Full Report`. Plugin menyimpan JSON lengkap dan TXT summary serta menghitung gate awal `GO_CANDIDATE` / `NO_GO` berdasarkan spike P0.
+
+## Foundation report review
+
+Report dari panel **tidak langsung membuka gate**. Review deterministik dilakukan dengan:
+
+```bash
+npm run review:foundation -- <path-ke-aavc-foundation-report.json> --out .aavc-foundation-test/results/foundation-review.json
+```
+
+Di Windows, report JSON juga dapat di-drag ke:
+
+`scripts/windows/REVIEW_FOUNDATION_REPORT.cmd`
+
+Reviewer:
+- memvalidasi schema report;
+- memeriksa baseline Premiere 25.6+;
+- membaca seluruh status S01–S16;
+- menilai P0 S07/S08/S10/S11/S12;
+- menghitung SHA-256 report sumber;
+- menghasilkan keputusan `NO_GO`, `REQUIRES_S10_FALLBACK_ADR`, `GO_CANDIDATE`, atau `GO_CANDIDATE_WITH_S10_FALLBACK`;
+- **tidak pernah** mengubah `docs/foundation-gate.json` secara otomatis.
+
+`GO_CANDIDATE*` masih membutuhkan review eksplisit sebelum gate boleh menjadi `GO_APPROVED`.
 
 ## Gate sebelum Tahap 02
 
-**Jangan mulai Core Architecture production hanya berdasarkan static check.** Keputusan ini dikunci oleh `ADR-0001`.
+**Jangan mulai Core Architecture production hanya berdasarkan static check atau GO_CANDIDATE.** Keputusan ini dikunci oleh `ADR-0001`.
 
 Minimal harus dibuktikan pada Premiere nyata:
 
@@ -166,7 +192,9 @@ Cara yang disarankan:
 7. Premiere → Window → UXP Plugins → AI Automatic Video Composer.
 8. Jalankan S01 → S16 sesuai runbook.
 9. Export Full Report ke `.aavc-foundation-test/results`.
-10. Gunakan report itu untuk keputusan GO/NO-GO Tahap 02.
+10. Jalankan reviewer report dan simpan `foundation-review.json`.
+11. Review evidence manusia/agent.
+12. Hanya bila disetujui, ubah gate menjadi `GO_APPROVED`.
 
 ## Security / permission note
 
@@ -180,17 +208,21 @@ npm run check
 
 CI mengecek:
 - syntax `main.js`, `batch-c.js`, `batch-d.js`, `batch-e.js`, `verification.js`;
+- syntax gate guard + report reviewer;
 - manifest foundation;
 - package readiness dasar;
-- **Stage 02 gate guard** agar source production tidak masuk sebelum real-host approval.
+- **Stage 02 gate guard** agar source production tidak masuk sebelum real-host approval;
+- **foundation reviewer self-test** untuk kasus GO, NO-GO, dan S10 fallback-required.
 
 Static validation tidak menggantikan test Premiere/AME/CCX nyata.
 
 ## Langkah berikutnya
 
 1. Jalankan Foundation Verification Kit v0.0.6 di Windows/Premiere nyata.
-2. Review `aavc-foundation-report-*.json`.
-3. Jika gate GO → ubah `docs/foundation-gate.json` menjadi `GO_APPROVED` dengan referensi evidence.
-4. Ubah Tahap 02 menjadi READY TO IMPLEMENT.
-5. Mulai **Batch P0 — Production TypeScript Skeleton** sesuai dokumen Tahap 02.
-6. Jika blocker gagal → perbaiki foundation terlebih dahulu dan jangan membuat workaround tersembunyi di production.
+2. Export `aavc-foundation-report-*.json`.
+3. Jalankan Foundation Report Reviewer dan hasilkan `foundation-review.json`.
+4. Jika keputusan `GO_CANDIDATE*`, review evidence dan limitation.
+5. Jika disetujui → ubah `docs/foundation-gate.json` menjadi `GO_APPROVED` dengan referensi evidence.
+6. Ubah Tahap 02 menjadi READY TO IMPLEMENT.
+7. Mulai **Batch P0 — Production TypeScript Skeleton** sesuai dokumen Tahap 02.
+8. Jika blocker gagal → perbaiki foundation terlebih dahulu dan jangan membuat workaround tersembunyi di production.
