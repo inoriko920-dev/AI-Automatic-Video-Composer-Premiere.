@@ -9,9 +9,9 @@
   <main class="app-shell">
     <header class="app-header">
       <div>
-        <div class="eyebrow">FOUNDATION / BATCH A + B</div>
+        <div class="eyebrow">FOUNDATION / BATCH A + B + C</div>
         <h1>AI Automatic Video Composer</h1>
-        <p class="muted">UXP Diagnostics · S01–S06</p>
+        <p class="muted">UXP Diagnostics · S01–S08</p>
       </div>
       <span id="overallBadge" class="badge badge-neutral">NOT RUN</span>
     </header>
@@ -115,6 +115,34 @@
 
     <section class="card">
       <div class="section-title-row">
+        <h2>S07 · Timeline Placement V1/V2</h2>
+        <span id="s07Badge" class="badge badge-neutral">NOT RUN</span>
+      </div>
+      <div class="notice warn">BLOCKER MVP · MUTATES TEST PROJECT: membuat/memakai sequence AAVC_SPIKE_S07_S08, mempertahankan A001 di V1 @ 0s, lalu menaruh A002 di V2 @ 1s.</div>
+      <div class="grid two-cols">
+        <div class="kv"><span>Sequence</span><strong id="s07SequenceName">—</strong></div>
+        <div class="kv"><span>Video tracks</span><strong id="s07Tracks">—</strong></div>
+      </div>
+      <button id="runS07" class="primary">Run S07 · Place A001/A002</button>
+      <pre id="s07Result" class="code-box">Belum ada hasil.</pre>
+    </section>
+
+    <section class="card">
+      <div class="section-title-row">
+        <h2>S08 · Timing & Duration</h2>
+        <span id="s08Badge" class="badge badge-neutral">NOT RUN</span>
+      </div>
+      <div class="notice warn">BLOCKER MVP · MUTATES TEST PROJECT: A001 ditargetkan 0→3s, A002 1→6s. Readback harus cocok dalam toleransi maksimum 1 frame.</div>
+      <div class="grid two-cols">
+        <div class="kv"><span>A001 timing</span><strong id="s08A001">—</strong></div>
+        <div class="kv"><span>A002 timing</span><strong id="s08A002">—</strong></div>
+      </div>
+      <button id="runS08" class="primary">Run S08 · Set 3s / 5s</button>
+      <pre id="s08Result" class="code-box">Belum ada hasil.</pre>
+    </section>
+
+    <section class="card">
+      <div class="section-title-row">
         <h2>Diagnostics Log</h2>
         <button id="clearLog" class="small">Clear</button>
       </div>
@@ -123,5 +151,6 @@
   </main>
 
   <script src="main.js"></script>
+  <script src="batch-c.js"></script>
 </body>
 </html>
