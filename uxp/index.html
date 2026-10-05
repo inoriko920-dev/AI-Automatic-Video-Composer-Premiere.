@@ -9,9 +9,9 @@
   <main class="app-shell">
     <header class="app-header">
       <div>
-        <div class="eyebrow">FOUNDATION / BATCH A</div>
+        <div class="eyebrow">FOUNDATION / BATCH A + B</div>
         <h1>AI Automatic Video Composer</h1>
-        <p class="muted">UXP Diagnostics · S01–S03</p>
+        <p class="muted">UXP Diagnostics · S01–S06</p>
       </div>
       <span id="overallBadge" class="badge badge-neutral">NOT RUN</span>
     </header>
@@ -67,6 +67,50 @@
       </div>
       <pre id="statePreview" class="code-box">Belum ada state.</pre>
       <button id="runS03" class="primary">Run S03 Summary</button>
+    </section>
+
+    <section class="card">
+      <div class="section-title-row">
+        <h2>S04 · Active Project</h2>
+        <span id="s04Badge" class="badge badge-neutral">NOT RUN</span>
+      </div>
+      <p class="muted">Read-only probe: project aktif, root, insertion bin, sequence, dan project tree.</p>
+      <div class="grid two-cols diagnostics-grid">
+        <div class="kv"><span>Project</span><strong id="projectName">—</strong></div>
+        <div class="kv"><span>GUID</span><strong id="projectGuid">—</strong></div>
+        <div class="kv"><span>Root</span><strong id="rootItemName">—</strong></div>
+        <div class="kv"><span>Insertion bin</span><strong id="insertionBinName">—</strong></div>
+        <div class="kv"><span>Sequences</span><strong id="sequenceCount">—</strong></div>
+        <div class="kv"><span>Active sequence</span><strong id="activeSequenceName">—</strong></div>
+        <div class="kv"><span>Root children</span><strong id="rootChildCount">—</strong></div>
+        <div class="kv"><span>Project path</span><strong id="projectPath">—</strong></div>
+      </div>
+      <button id="runS04" class="primary">Run S04</button>
+    </section>
+
+    <section class="card">
+      <div class="section-title-row">
+        <h2>S05 · Bin + Import Axxx</h2>
+        <span id="s05Badge" class="badge badge-neutral">NOT RUN</span>
+      </div>
+      <div class="notice warn">MUTATES TEST PROJECT: membuat/memakai bin AAVC_GENERATED lalu mengimport dua aset pertama dua kali untuk mengamati duplicate behavior.</div>
+      <p class="muted">Jalankan S03 folder picker dan S04 terlebih dahulu. Gunakan project TEST.</p>
+      <button id="runS05" class="primary">Run S05 · Import Probe</button>
+      <pre id="s05Result" class="code-box">Belum ada hasil.</pre>
+    </section>
+
+    <section class="card">
+      <div class="section-title-row">
+        <h2>S06 · Sequence Creation</h2>
+        <span id="s06Badge" class="badge badge-neutral">NOT RUN</span>
+      </div>
+      <div class="notice warn">MUTATES TEST PROJECT: membuat sequence AAVC_SPIKE_S06 dari dua ClipProjectItem hasil S05.</div>
+      <div class="grid two-cols">
+        <div class="kv"><span>Sequence</span><strong id="createdSequenceName">—</strong></div>
+        <div class="kv"><span>Tracks</span><strong id="createdSequenceTracks">—</strong></div>
+      </div>
+      <button id="runS06" class="primary">Run S06 · Create Sequence</button>
+      <pre id="s06Result" class="code-box">Belum ada hasil.</pre>
     </section>
 
     <section class="card">
