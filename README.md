@@ -4,9 +4,9 @@ Plugin Adobe Premiere Pro untuk menyusun video naratif/infografis secara otomati
 
 ## Status proyek
 
-**Fase saat ini: Tahap 00 selesai / Tahap 01 direncanakan.**
+**Fase saat ini: Tahap 00 selesai / Tahap 01 sedang berjalan / Batch A S01–S03 sudah diimplementasikan dan belum diverifikasi di Premiere nyata.**
 
-Belum ada engine production. Repo sengaja dimulai dari dokumentasi dan pembuktian API agar arsitektur tidak dibangun berdasarkan asumsi.
+Repo sengaja memakai pola **implement → verify di host nyata → baru promote ke production architecture**. Kode probe tidak otomatis dianggap PASS hanya karena sudah ada di repo.
 
 Baseline teknis yang dikunci untuk foundation:
 
@@ -41,6 +41,27 @@ Alur target:
 2. [`docs/01_UXP_FOUNDATION_API_SPIKE_PLAN.md`](docs/01_UXP_FOUNDATION_API_SPIKE_PLAN.md) — rencana pembuktian API sebelum engine production.
 3. [`docs/adr/README.md`](docs/adr/README.md) — aturan Architecture Decision Record.
 4. [`docs/spike-results/README.md`](docs/spike-results/README.md) — format hasil setiap API spike.
+5. [`docs/spike-results/S01-S03_BATCH_A.md`](docs/spike-results/S01-S03_BATCH_A.md) — record verifikasi Batch A.
+6. [`uxp/README.md`](uxp/README.md) — cara load dan menguji plugin foundation.
+
+## Batch A — S01–S03
+
+Kode UXP minimal tersedia di folder [`uxp/`](uxp/):
+
+- **S01 Plugin Boot & Panel** — manifest v5, panel diagnostics, lifecycle/logging.
+- **S02 Host & Version Gate** — host, Premiere version, UXP version, OS, architecture, locale, minimum gate 25.6.
+- **S03 Filesystem Access** — PNG picker, folder picker, enumerasi `Axxx`, write/read persistent plugin-data JSON.
+
+Batch ini memakai **JavaScript murni tanpa bundler** untuk mengurangi variabel kegagalan saat foundation diuji. Refactor TypeScript dilakukan setelah API foundation terbukti.
+
+### Cara mulai test
+
+1. Buka Premiere Pro 25.6+.
+2. Buka UXP Developer Tool 2.2+.
+3. Add Plugin → pilih `uxp/manifest.json`.
+4. Load plugin.
+5. Premiere → `Window > UXP Plugins > AI Automatic Video Composer`.
+6. Ikuti checklist di `uxp/README.md`.
 
 ## Prinsip implementasi
 
@@ -67,6 +88,9 @@ Jika salah satu gagal tanpa fallback yang layak, arsitektur harus diselesaikan l
 - **ASTRA / planner:** memecah pekerjaan, menilai hasil spike, membuat ADR, menjaga scope dan acceptance criteria.
 - **SOL / implementer:** membangun kode, menjalankan spike, membuat test/log/result, dan hanya membawa API yang sudah terbukti ke adapter production.
 
-## Status berikutnya
+## Langkah berikutnya
 
-Tahap berikutnya adalah menjalankan **Tahap 01 — UXP Foundation & API Spike**, mulai dari S01 Plugin Boot & Panel sampai S16 Packaging CCX. Setelah P0 lulus, proyek masuk ke Tahap 02 Core Architecture.
+1. Verifikasi S01–S03 di Premiere/UDT nyata.
+2. Catat hasil di `docs/spike-results/S01-S03_BATCH_A.md`.
+3. Jika Batch A PASS, lanjut Batch B: **S04 Active Project → S05 Bin/Import Media → S06 Sequence Creation**.
+4. Setelah itu baru masuk blocker utama S07/S08/S11.
