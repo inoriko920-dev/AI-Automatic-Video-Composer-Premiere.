@@ -47,7 +47,13 @@ Tidak ada spike yang otomatis dianggap PASS hanya karena kodenya ada di repo ata
 - `docs/02_FOUNDATION_VERIFICATION_RUNBOOK.md`
 - `docs/03_STAGE_02_CORE_ARCHITECTURE_PRODUCTION_PLAN.md`
 - `docs/04_STAGE_02_EXECUTION_CHECKLIST_ASTRA_SOL.md`
+- `docs/contracts/README.md`
+- `docs/contracts/05_SCENE_DOCX_INPUT_CONTRACT.md`
+- `docs/contracts/06_AXXX_ASSET_BINDER_CONTRACT.md`
+- `docs/contracts/07_COMPOSER_PLAN_PROJECT_STATE_SCHEMA.md`
+- `docs/contracts/08_VALIDATION_ERROR_CATALOG.md`
 - `docs/adr/0001-foundation-gate-before-production.md`
+- `docs/adr/0002-preserve-user-edits-on-rerun.md`
 - `docs/spike-results/S01-S03_BATCH_A.md`
 - `docs/spike-results/S04-S06_BATCH_B.md`
 - `docs/spike-results/S07-S08_BATCH_C.md`
@@ -119,23 +125,25 @@ S13–S16 boleh memiliki limitation yang tidak memblokir composer dasar, tetapi 
 
 ## Tahap 02 — sudah dirancang, belum diimplementasikan
 
-Blueprint production ada di `docs/03_STAGE_02_CORE_ARCHITECTURE_PRODUCTION_PLAN.md`, dan checklist eksekusi ASTRA → SOL ada di `docs/04_STAGE_02_EXECUTION_CHECKLIST_ASTRA_SOL.md`.
+Blueprint production ada di `docs/03_STAGE_02_CORE_ARCHITECTURE_PRODUCTION_PLAN.md`, checklist eksekusi ASTRA → SOL ada di `docs/04_STAGE_02_EXECUTION_CHECKLIST_ASTRA_SOL.md`, dan kontrak production formal ada di `docs/contracts/`.
 
 Desain tersebut sudah mengunci:
 - TypeScript strict + production build layer;
 - pemisahan `domain / ports / infrastructure / presentation`;
-- Scene DOCX parser contract;
-- canonical `Axxx` binder;
+- Scene DOCX parser contract + stable scene ID;
+- canonical `Axxx` binder + missing/duplicate policy;
 - `ComposerPlan` sebelum mutation;
+- schema-versioned `ProjectState` dan migration policy;
 - Premiere adapter boundary;
 - capability registry;
-- stable identity + state schema;
+- stable generated item identity;
 - deterministic SINGLE/DOUBLE layout;
 - unified Premiere time conversion;
 - transaction/readback rules;
-- idempotent rerun + three-way user-edit protection;
-- Validation Center error codes;
-- fixture F01–F10;
+- idempotent three-way rerun;
+- **manual user edits protected by default** sesuai ADR-0002;
+- Validation Center dengan error code stabil;
+- fixture/stress test 3/10/100 scene;
 - implementasi Batch P0–P8 dengan acceptance per batch.
 
 Status resmi Tahap 02 tetap:
