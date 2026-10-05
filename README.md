@@ -4,7 +4,7 @@ Plugin Adobe Premiere Pro untuk menyusun video naratif/infografis secara otomati
 
 ## Status proyek
 
-**Fase saat ini: Tahap 00 selesai / Tahap 01 sedang berjalan / Batch A S01–S03, Batch B S04–S06, dan Batch C S07–S08 sudah diimplementasikan, tetapi belum diverifikasi di Premiere nyata.**
+**Fase saat ini: Tahap 00 selesai / Tahap 01 sedang berjalan / Batch A S01–S03, Batch B S04–S06, Batch C S07–S08, dan Batch D S09–S11 sudah diimplementasikan, tetapi belum diverifikasi di Premiere nyata.**
 
 Repo memakai pola **implement → verify di host nyata → baru promote ke production architecture**. Kode probe tidak otomatis dianggap PASS hanya karena sudah ada di repo atau static check GitHub berhasil.
 
@@ -43,7 +43,8 @@ Baseline teknis:
 5. [`docs/spike-results/S01-S03_BATCH_A.md`](docs/spike-results/S01-S03_BATCH_A.md) — record Batch A.
 6. [`docs/spike-results/S04-S06_BATCH_B.md`](docs/spike-results/S04-S06_BATCH_B.md) — record Batch B.
 7. [`docs/spike-results/S07-S08_BATCH_C.md`](docs/spike-results/S07-S08_BATCH_C.md) — record Batch C.
-8. [`uxp/README.md`](uxp/README.md) — cara load dan menguji plugin foundation.
+8. [`docs/spike-results/S09-S11_BATCH_D.md`](docs/spike-results/S09-S11_BATCH_D.md) — record Batch D.
+9. [`uxp/README.md`](uxp/README.md) — cara load dan menguji plugin foundation.
 
 ## Foundation yang sudah diimplementasikan
 
@@ -61,7 +62,12 @@ Baseline teknis:
 - **S07 Timeline Placement** — sequence khusus `AAVC_SPIKE_S07_S08`, A001 di V1 @ 0 s, A002 di V2 @ 1 s, menggunakan `SequenceEditor.createInsertProjectItemAction()` dan DOM readback.
 - **S08 Timing & Duration** — A001 ditargetkan 3 s, A002 ditargetkan 5 s menggunakan `VideoClipTrackItem.createSetEndAction()` dalam satu transaction, lalu diverifikasi lewat `getStartTime()`, `getEndTime()`, dan `getDuration()` dengan toleransi maksimum 1 frame.
 
-Pembuatan bin dan mutasi timeline memakai `Project.lockedAccess()` + `Project.executeTransaction()` agar Action dibuat di scope yang aman dan masuk Undo history secara logis.
+### Batch D — S09–S11
+- **S09 Motion Parameter Discovery** — enumerate seluruh video component/parameter A001, baca component `matchName`, parameter display/value/keyframe capability, cari kandidat Motion/Position/Scale/Opacity, lalu static mutation + readback + restore pada numeric candidate yang aman.
+- **S10 Native Keyframe Animation** — enable time-varying, tambah dua keyframe pada 0 s dan 2 s, set LINEAR interpolation bila tersedia, lalu verifikasi lewat keyframe list dan value readback. Transaction success saja tidak dianggap bukti.
+- **S11 Transaction & One Undo** — dua perubahan timing dimasukkan ke satu `executeTransaction()`. Setelah satu Ctrl+Z manual di Premiere, tombol Verify wajib membuktikan kedua state kembali ke baseline.
+
+Semua Action dibuat di dalam `Project.lockedAccess()` dan dieksekusi lewat `Project.executeTransaction()` sesuai aturan API Premiere terbaru.
 
 `createSequenceWithPresetPath()` tidak menjadi dependency MVP karena baru tersedia mulai Premiere 26.3; baseline menggunakan API yang tersedia sejak 25.6.
 
@@ -73,10 +79,11 @@ Pembuatan bin dan mutasi timeline memakai `Project.lockedAccess()` + `Project.ex
 4. Add Plugin → pilih `uxp/manifest.json`.
 5. Load plugin.
 6. Premiere → `Window > UXP Plugins > AI Automatic Video Composer`.
-7. Jalankan S01 → S02 → S03 → S04 → S05 → S06 → S07 → S08.
-8. Isi hasil nyata di `docs/spike-results/`.
+7. Jalankan S01 → S02 → ... → S11 secara berurutan.
+8. Pada S11, setelah mutation berhasil, tekan **Ctrl+Z satu kali** tanpa edit lain lalu klik `Verify S11 Undo`.
+9. Isi hasil nyata di `docs/spike-results/`.
 
-S05–S08 memodifikasi project test.
+S05–S11 memodifikasi project test; beberapa probe merestore nilainya sendiri, tetapi jangan gunakan project produksi.
 
 ## Prinsip implementasi
 
@@ -87,6 +94,7 @@ S05–S08 memodifikasi project test.
 - Jangan merusak edit manual user saat plugin dijalankan ulang.
 - Gemini/AI adalah fitur opsional; composer dasar harus tetap bekerja tanpa internet.
 - Fitur Premiere 26.x/27.x harus di-version-gate dan tidak boleh diam-diam menaikkan minimum MVP 25.6.
+- Parameter Motion tidak boleh bergantung pada satu English display name; simpan inventory host/locale dan gunakan capability/shape/matchName evidence.
 
 ## Gate Tahap 01
 
@@ -96,7 +104,7 @@ Tiga kemampuan berikut adalah blocker utama sebelum parser DOCX/composer product
 - **S08 — Timing & Duration**
 - **S11 — Transaction & Undo**
 
-Jika salah satu gagal tanpa fallback yang layak, arsitektur harus diselesaikan lebih dulu.
+S10 juga harus PASS bila motion/keyframe native dijadikan bagian wajib MVP. Bila host mengalami bug keyframe tetapi S07/S08/S11 stabil, composer MVP dapat dilanjutkan tanpa motion native sementara dan motion dibuat capability-gated.
 
 ## Workflow agen
 
@@ -105,8 +113,8 @@ Jika salah satu gagal tanpa fallback yang layak, arsitektur harus diselesaikan l
 
 ## Langkah berikutnya
 
-Setelah S07/S08 diverifikasi di Premiere nyata, lanjutkan:
+Setelah Batch D diverifikasi pada Premiere nyata, lanjutkan Tahap 01:
 
-**S09 Motion Parameter Discovery → S10 Keyframe Animation → S11 Transaction/Undo.**
+**S12 Identity / Rerun Safety → S13 Network Permission → S14 Encoder Export → S15 MOGRT/Graphics → S16 Packaging CCX.**
 
 Jangan mulai parser DOCX production sebelum blocker S07/S08/S11 mempunyai jalur yang terbukti.
