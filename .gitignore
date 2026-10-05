@@ -39,6 +39,7 @@ temp/
 exports/
 render-output/
 spike-output/
+.aavc-foundation-test/
 
 # TypeScript caches
 *.tsbuildinfo

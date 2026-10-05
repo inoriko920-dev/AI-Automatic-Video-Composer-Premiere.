@@ -11,7 +11,7 @@
       <div>
         <div class="eyebrow">FOUNDATION / BATCH A–E</div>
         <h1>AI Automatic Video Composer</h1>
-        <p class="muted">UXP Diagnostics · S01–S16 · Foundation v0.0.5</p>
+        <p class="muted">UXP Diagnostics · S01–S16 · Foundation v0.0.6</p>
       </div>
       <span id="overallBadge" class="badge badge-neutral">NOT RUN</span>
     </header>
@@ -48,6 +48,14 @@
 
     <section class="card"><div class="section-title-row"><h2>S16 · Packaging CCX</h2><span id="s16Badge" class="badge badge-neutral">NOT RUN</span></div><div class="notice warn">Final PASS memerlukan UDT Package → install .ccx → smoke test packaged install. Static readiness dijalankan juga di CI.</div><div class="kv"><span>Package</span><strong id="s16Package">—</strong></div><button id="runS16" class="primary">Run S16 · Readiness</button><pre id="s16Result" class="code-box">Belum ada hasil.</pre></section>
 
+    <section class="card">
+      <div class="section-title-row"><h2>Verification Report</h2><span class="badge badge-neutral">v0.0.6</span></div>
+      <p class="muted">Setelah S01–S16 selesai, ekspor bukti lengkap ke folder results. Report menghitung gate GO/NO-GO dari status P0.</p>
+      <div class="kv"><span>Output folder</span><strong id="verificationFolder">belum dipilih</strong></div>
+      <div class="button-row"><button id="pickVerificationFolder">Pilih Folder Report</button><button id="exportVerificationReport" class="primary">Export Full Report</button></div>
+      <pre id="verificationResult" class="code-box">Belum ada report.</pre>
+    </section>
+
     <section class="card"><div class="section-title-row"><h2>Diagnostics Log</h2><button id="clearLog" class="small">Clear</button></div><pre id="log" class="log-box"></pre></section>
   </main>
 
@@ -55,5 +63,6 @@
   <script src="batch-c.js"></script>
   <script src="batch-d.js"></script>
   <script src="batch-e.js"></script>
+  <script src="verification.js"></script>
 </body>
 </html>
