@@ -1,9 +1,12 @@
 const { entrypoints, host, versions, storage } = require("uxp");
 const os = require("os");
+const app = require("premierepro");
 
 const localFileSystem = storage.localFileSystem;
 const MIN_PREMIERE = "25.6.0";
 const PERSISTENCE_FILE = "s03-persistent-state.json";
+const GENERATED_BIN_NAME = "AAVC_GENERATED";
+const S06_SEQUENCE_NAME = "AAVC_SPIKE_S06";
 
 const runtime = {
   panelCreated: false,
@@ -11,9 +14,23 @@ const runtime = {
   pickedFile: null,
   pickedFolder: null,
   canonicalAssets: [],
+  canonicalAssetEntries: [],
   wroteState: false,
   readState: false,
-  statuses: { s01: "NOT RUN", s02: "NOT RUN", s03: "NOT RUN" }
+  project: null,
+  rootItem: null,
+  insertionBin: null,
+  generatedBin: null,
+  importedClips: [],
+  createdSequence: null,
+  statuses: {
+    s01: "NOT RUN",
+    s02: "NOT RUN",
+    s03: "NOT RUN",
+    s04: "NOT RUN",
+    s05: "NOT RUN",
+    s06: "NOT RUN"
+  }
 };
 
 function el(id) {
@@ -40,6 +57,15 @@ function errorToText(error) {
   return String(error.message || error);
 }
 
+function safeText(value, fallback = "—") {
+  if (value === null || value === undefined || value === "") return fallback;
+  try {
+    return String(value);
+  } catch (_) {
+    return fallback;
+  }
+}
+
 function setBadge(id, status) {
   const node = el(id);
   if (!node) return;
@@ -61,7 +87,8 @@ function updateOverallStatus() {
   let overall = "NOT RUN";
   if (values.includes("FAIL") || values.includes("BLOCKED_BY_VERSION")) overall = "FAIL";
   else if (values.every((v) => v === "PASS")) overall = "PASS";
-  else if (values.some((v) => v === "PASS" || v === "PASS_WITH_LIMIT")) overall = "PASS_WITH_LIMIT";
+  else if (values.some((v) => v === "PASS_WITH_LIMIT")) overall = "PASS_WITH_LIMIT";
+  else if (values.some((v) => v === "PASS")) overall = "PASS_WITH_LIMIT";
   setBadge("overallBadge", overall);
 }
 
@@ -190,21 +217,21 @@ async function pickAssetFolder() {
     }
 
     const entries = await folder.getEntries();
-    const canonical = entries
+    const canonicalEntries = entries
       .filter((entry) => entry && entry.isFile && /^A\d{3,}\.(png|jpe?g|webp)$/i.test(entry.name))
-      .map((entry) => entry.name)
-      .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+      .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
 
     runtime.pickedFolder = folder;
-    runtime.canonicalAssets = canonical;
+    runtime.canonicalAssetEntries = canonicalEntries;
+    runtime.canonicalAssets = canonicalEntries.map((entry) => entry.name);
 
     el("pickedFolder").textContent = folder.nativePath || folder.name;
-    el("assetCount").textContent = String(canonical.length);
-    el("assetPreview").textContent = canonical.length
-      ? canonical.slice(0, 20).join(", ") + (canonical.length > 20 ? " …" : "")
+    el("assetCount").textContent = String(runtime.canonicalAssets.length);
+    el("assetPreview").textContent = runtime.canonicalAssets.length
+      ? runtime.canonicalAssets.slice(0, 20).join(", ") + (runtime.canonicalAssets.length > 20 ? " …" : "")
       : "Tidak ada file canonical Axxx yang ditemukan di level folder ini.";
 
-    log(`S03 folder selected: ${folder.name}; canonical assets=${canonical.length}.`);
+    log(`S03 folder selected: ${folder.name}; canonical assets=${runtime.canonicalAssets.length}.`);
   } catch (error) {
     setStatus("s03", "FAIL");
     log(`S03 folder enumeration failed — ${errorToText(error)}`, "ERROR");
@@ -266,6 +293,330 @@ function runS03Summary() {
   }
 }
 
+async function getProjectContext() {
+  const project = await app.Project.getActiveProject();
+  if (!project) {
+    throw new Error("Tidak ada active project. Buka atau buat project Premiere terlebih dahulu.");
+  }
+  const rootItem = await project.getRootItem();
+  const insertionBin = await project.getInsertionBin();
+  const sequences = await project.getSequences();
+  return { project, rootItem, insertionBin, sequences };
+}
+
+async function runS04() {
+  try {
+    const context = await getProjectContext();
+    runtime.project = context.project;
+    runtime.rootItem = context.rootItem;
+    runtime.insertionBin = context.insertionBin;
+
+    const rootChildren = context.rootItem ? await context.rootItem.getItems() : [];
+    let activeSequence = null;
+    try {
+      activeSequence = await context.project.getActiveSequence();
+    } catch (_) {
+      activeSequence = null;
+    }
+
+    el("projectName").textContent = safeText(context.project.name);
+    el("projectGuid").textContent = safeText(context.project.guid);
+    el("projectPath").textContent = safeText(context.project.path, "(project belum disimpan / path kosong)");
+    el("rootItemName").textContent = context.rootItem ? safeText(context.rootItem.name, "(root)") : "—";
+    el("insertionBinName").textContent = context.insertionBin ? safeText(context.insertionBin.name, "(root)") : "—";
+    el("sequenceCount").textContent = String(context.sequences.length);
+    el("activeSequenceName").textContent = activeSequence ? safeText(activeSequence.name) : "(tidak ada active sequence)";
+    el("rootChildCount").textContent = String(rootChildren.length);
+
+    const ok = Boolean(context.project && context.rootItem && Array.isArray(context.sequences));
+    if (!ok) {
+      setStatus("s04", "FAIL");
+      log("S04 FAIL — project object ditemukan tetapi root/sequences tidak lengkap.", "ERROR");
+      return;
+    }
+
+    setStatus("s04", "PASS");
+    log(`S04 PASS — project=${context.project.name}, sequences=${context.sequences.length}, rootChildren=${rootChildren.length}.`);
+  } catch (error) {
+    setStatus("s04", "FAIL");
+    log(`S04 FAIL — ${errorToText(error)}`, "ERROR");
+  }
+}
+
+function tryCastFolder(projectItem) {
+  if (!projectItem) return null;
+  try {
+    return app.FolderItem.cast(projectItem);
+  } catch (_) {
+    return null;
+  }
+}
+
+function tryCastClip(projectItem) {
+  if (!projectItem) return null;
+  try {
+    return app.ClipProjectItem.cast(projectItem);
+  } catch (_) {
+    return null;
+  }
+}
+
+function toProjectItem(item) {
+  try {
+    return app.ProjectItem.cast(item);
+  } catch (_) {
+    return item;
+  }
+}
+
+async function findChildFolderByName(folderItem, name) {
+  const items = await folderItem.getItems();
+  for (const item of items) {
+    if (safeText(item.name, "") !== name) continue;
+    const folder = tryCastFolder(item);
+    if (folder) return folder;
+  }
+  return null;
+}
+
+async function ensureGeneratedBin(project, rootItem) {
+  let folder = await findChildFolderByName(rootItem, GENERATED_BIN_NAME);
+  if (folder) {
+    log(`S05 using existing bin ${GENERATED_BIN_NAME}.`);
+    return folder;
+  }
+
+  project.lockedAccess(() => {
+    const action = rootItem.createBinAction(GENERATED_BIN_NAME, false);
+    const success = project.executeTransaction((compoundAction) => {
+      compoundAction.addAction(action);
+    }, "AAVC: Create Generated Bin");
+
+    if (!success) {
+      throw new Error("executeTransaction returned false while creating generated bin.");
+    }
+  });
+
+  folder = await findChildFolderByName(rootItem, GENERATED_BIN_NAME);
+  if (!folder) {
+    throw new Error(`Bin ${GENERATED_BIN_NAME} tidak ditemukan setelah transaction.`);
+  }
+
+  log(`S05 created bin ${GENERATED_BIN_NAME}.`);
+  return folder;
+}
+
+function canonicalKeyFromName(name) {
+  const match = String(name || "").match(/^(A\d{3,})(?:\.[^.]+)?$/i);
+  return match ? match[1].toUpperCase() : null;
+}
+
+async function collectCanonicalClips(folderItem, keys) {
+  const wanted = new Set(keys.map((key) => key.toUpperCase()));
+  const result = [];
+  const items = await folderItem.getItems();
+
+  for (const item of items) {
+    const key = canonicalKeyFromName(item.name);
+    if (!key || !wanted.has(key)) continue;
+    const clip = tryCastClip(item);
+    if (clip) result.push({ key, clip, item });
+  }
+
+  return result;
+}
+
+function selectedCanonicalEntries(limit = 2) {
+  return runtime.canonicalAssetEntries.slice(0, limit);
+}
+
+async function runS05() {
+  try {
+    if (!runtime.pickedFolder || runtime.canonicalAssetEntries.length < 2) {
+      throw new Error("S05 membutuhkan folder aset dari S03 dengan minimal dua file canonical Axxx.");
+    }
+
+    const context = await getProjectContext();
+    runtime.project = context.project;
+    runtime.rootItem = context.rootItem;
+
+    const generatedBin = await ensureGeneratedBin(context.project, context.rootItem);
+    runtime.generatedBin = generatedBin;
+
+    const selected = selectedCanonicalEntries(2);
+    const keys = selected.map((entry) => canonicalKeyFromName(entry.name)).filter(Boolean);
+    const paths = selected.map((entry) => entry.nativePath).filter(Boolean);
+
+    if (paths.length !== selected.length) {
+      throw new Error("Satu atau lebih file fixture tidak menyediakan nativePath. Pilih ulang folder melalui S03.");
+    }
+
+    const before = await collectCanonicalClips(generatedBin, keys);
+    const import1 = await context.project.importFiles(paths, true, toProjectItem(generatedBin), false);
+    const afterFirst = await collectCanonicalClips(generatedBin, keys);
+
+    const import2 = await context.project.importFiles(paths, true, toProjectItem(generatedBin), false);
+    const afterSecond = await collectCanonicalClips(generatedBin, keys);
+
+    runtime.importedClips = [];
+    for (const key of keys) {
+      const match = afterSecond.find((entry) => entry.key === key);
+      if (match && !runtime.importedClips.includes(match.clip)) {
+        runtime.importedClips.push(match.clip);
+      }
+    }
+
+    const duplicateDelta = afterSecond.length - afterFirst.length;
+    const payload = {
+      targetBin: GENERATED_BIN_NAME,
+      files: selected.map((entry) => entry.name),
+      import1,
+      import2,
+      matchingClipsBefore: before.length,
+      matchingClipsAfterFirst: afterFirst.length,
+      matchingClipsAfterSecond: afterSecond.length,
+      duplicateDelta,
+      uniqueClipKeysReady: runtime.importedClips.length
+    };
+
+    el("s05Result").textContent = JSON.stringify(payload, null, 2);
+
+    const importedEnough = runtime.importedClips.length >= 2;
+    if (!import1 || !importedEnough) {
+      setStatus("s05", "FAIL");
+      log(`S05 FAIL — import1=${import1}, unique clips ready=${runtime.importedClips.length}.`, "ERROR");
+      return;
+    }
+
+    if (duplicateDelta > 0) {
+      setStatus("s05", "PASS_WITH_LIMIT");
+      log(`S05 PASS_WITH_LIMIT — import berhasil, tetapi second import menambah ${duplicateDelta} matching item(s). Strategi anti-duplikasi wajib di production.`, "WARN");
+    } else {
+      setStatus("s05", "PASS");
+      log("S05 PASS — Axxx import berhasil dan second import tidak menambah matching item baru.");
+    }
+  } catch (error) {
+    setStatus("s05", "FAIL");
+    log(`S05 FAIL — ${errorToText(error)}`, "ERROR");
+  }
+}
+
+async function getImportedClipsForS06(project, generatedBin) {
+  if (runtime.importedClips.length >= 2) return runtime.importedClips.slice(0, 2);
+
+  const keys = selectedCanonicalEntries(2)
+    .map((entry) => canonicalKeyFromName(entry.name))
+    .filter(Boolean);
+
+  if (keys.length < 2) return [];
+
+  const matches = await collectCanonicalClips(generatedBin, keys);
+  const clips = [];
+  for (const key of keys) {
+    const match = matches.find((entry) => entry.key === key);
+    if (match) clips.push(match.clip);
+  }
+  return clips;
+}
+
+async function runS06() {
+  try {
+    const context = await getProjectContext();
+    runtime.project = context.project;
+    runtime.rootItem = context.rootItem;
+
+    const generatedBin = runtime.generatedBin || await findChildFolderByName(context.rootItem, GENERATED_BIN_NAME);
+    if (!generatedBin) {
+      throw new Error(`Bin ${GENERATED_BIN_NAME} belum ada. Jalankan S05 terlebih dahulu.`);
+    }
+    runtime.generatedBin = generatedBin;
+
+    const clips = await getImportedClipsForS06(context.project, generatedBin);
+    if (clips.length < 2) {
+      throw new Error("S06 membutuhkan minimal dua ClipProjectItem hasil S05.");
+    }
+
+    const existingSequences = await context.project.getSequences();
+    let sequence = existingSequences.find((item) => safeText(item.name, "") === S06_SEQUENCE_NAME) || null;
+    let createdNow = false;
+
+    if (!sequence) {
+      sequence = await context.project.createSequenceFromMedia(
+        S06_SEQUENCE_NAME,
+        clips.slice(0, 2),
+        toProjectItem(generatedBin)
+      );
+      createdNow = Boolean(sequence);
+    }
+
+    if (!sequence) {
+      throw new Error("createSequenceFromMedia tidak mengembalikan Sequence.");
+    }
+
+    runtime.createdSequence = sequence;
+
+    let setActiveResult = null;
+    try {
+      setActiveResult = await context.project.setActiveSequence(sequence);
+    } catch (error) {
+      log(`S06 note — setActiveSequence failed: ${error.message || error}`, "WARN");
+    }
+
+    let openedResult = null;
+    try {
+      openedResult = await context.project.openSequence(sequence);
+    } catch (error) {
+      log(`S06 note — openSequence failed: ${error.message || error}`, "WARN");
+    }
+
+    const sequencesAfter = await context.project.getSequences();
+    const readback = sequencesAfter.find((item) => safeText(item.name, "") === S06_SEQUENCE_NAME) || null;
+    const videoTrackCount = await sequence.getVideoTrackCount();
+    const audioTrackCount = await sequence.getAudioTrackCount();
+    const frameSize = await sequence.getFrameSize();
+    const timebase = await sequence.getTimebase();
+    const endTime = await sequence.getEndTime();
+
+    const payload = {
+      strategy: "Project.createSequenceFromMedia",
+      baseline: "Premiere 25.6+",
+      sequenceName: sequence.name,
+      sequenceGuid: safeText(sequence.guid),
+      createdNow,
+      readbackFound: Boolean(readback),
+      setActiveResult,
+      openedResult,
+      videoTrackCount,
+      audioTrackCount,
+      frameSize: frameSize ? { x: frameSize.x, y: frameSize.y, width: frameSize.width, height: frameSize.height } : null,
+      timebase: safeText(timebase),
+      endTimeTicks: endTime ? safeText(endTime.ticks) : null
+    };
+
+    el("s06Result").textContent = JSON.stringify(payload, null, 2);
+    el("createdSequenceName").textContent = sequence.name || "—";
+    el("createdSequenceTracks").textContent = `V=${videoTrackCount}, A=${audioTrackCount}`;
+
+    if (!readback) {
+      setStatus("s06", "FAIL");
+      log("S06 FAIL — sequence returned but was not found in getSequences() readback.", "ERROR");
+      return;
+    }
+
+    if (!createdNow) {
+      setStatus("s06", "PASS_WITH_LIMIT");
+      log(`S06 PASS_WITH_LIMIT — existing ${S06_SEQUENCE_NAME} found and read back. Delete it manually if you need to re-prove creation.`, "WARN");
+      return;
+    }
+
+    setStatus("s06", "PASS");
+    log(`S06 PASS — sequence ${S06_SEQUENCE_NAME} created from media; V=${videoTrackCount}, A=${audioTrackCount}.`);
+  } catch (error) {
+    setStatus("s06", "FAIL");
+    log(`S06 FAIL — ${errorToText(error)}`, "ERROR");
+  }
+}
+
 function wireUi() {
   el("runS01").addEventListener("click", runS01);
   el("runS02").addEventListener("click", runS02);
@@ -274,6 +625,9 @@ function wireUi() {
   el("writeState").addEventListener("click", writePersistentState);
   el("readState").addEventListener("click", readPersistentState);
   el("runS03").addEventListener("click", runS03Summary);
+  el("runS04").addEventListener("click", runS04);
+  el("runS05").addEventListener("click", runS05);
+  el("runS06").addEventListener("click", runS06);
   el("clearLog").addEventListener("click", () => { el("log").textContent = ""; });
 }
 
@@ -281,7 +635,7 @@ function initializeDom() {
   wireUi();
   renderLifecycle();
   renderHostInfo(collectHostInfo());
-  log("Diagnostics UI initialized. Run S01, S02, then complete all S03 controls.");
+  log("Diagnostics UI initialized. Batch A S01–S03 + Batch B S04–S06 are implemented.");
 }
 
 if (typeof window !== "undefined" && window.addEventListener) {
