@@ -3,14 +3,19 @@
   "id": "com.inoriko920.aavc.premiere",
   "name": "AI Automatic Video Composer Premiere",
   "shortname": "AAVC Premiere",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "main": "index.html",
   "host": {
     "app": "premierepro",
     "minVersion": "25.6.0"
   },
   "requiredPermissions": {
-    "localFileSystem": "request"
+    "localFileSystem": "request",
+    "network": {
+      "domains": [
+        "https://httpbin.org"
+      ]
+    }
   },
   "entrypoints": [
     {
