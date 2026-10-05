@@ -1,0 +1,23 @@
+{
+  "fixtureVersion": 1,
+  "fixtureId": "F-RERUN-03",
+  "sceneId": "SCN-007-test",
+  "lastGenerated": {
+    "position": [960, 540],
+    "durationSeconds": 5
+  },
+  "currentPremiere": {
+    "position": [1040, 520],
+    "durationSeconds": 5
+  },
+  "newDesired": {
+    "position": [960, 540],
+    "durationSeconds": 5
+  },
+  "expected": {
+    "decision": "CONFLICT_USER_EDIT",
+    "validationCode": "USER_EDIT_CONFLICT",
+    "defaultResolution": "KEEP_MANUAL_EDIT",
+    "automaticOverwriteAllowed": false
+  }
+}
