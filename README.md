@@ -6,6 +6,8 @@ Plugin Adobe Premiere Pro untuk menyusun video naratif/infografis secara otomati
 
 **Tahap 00 selesai. Tahap 01 Foundation/API Spike: S01–S16 sudah IMPLEMENTED, tetapi belum VERIFIED penuh di Premiere nyata.**
 
+Foundation test build saat ini: **v0.0.6**.
+
 Repo memakai aturan:
 
 `implement → static validate → verify di Premiere nyata → dokumentasikan limitation → baru promote ke production architecture`
@@ -42,11 +44,13 @@ Tidak ada spike yang otomatis dianggap PASS hanya karena kodenya ada di repo ata
 
 - `docs/00_MASTER_PLAN_AI_AUTOMATIC_VIDEO_COMPOSER_PREMIERE.md`
 - `docs/01_UXP_FOUNDATION_API_SPIKE_PLAN.md`
+- `docs/02_FOUNDATION_VERIFICATION_RUNBOOK.md`
 - `docs/spike-results/S01-S03_BATCH_A.md`
 - `docs/spike-results/S04-S06_BATCH_B.md`
 - `docs/spike-results/S07-S08_BATCH_C.md`
 - `docs/spike-results/S09-S11_BATCH_D.md`
 - `docs/spike-results/S12-S16_BATCH_E.md`
+- `docs/spike-results/FOUNDATION_VERIFICATION_REPORT_TEMPLATE.md`
 - `uxp/README.md`
 
 ## Foundation yang sudah diimplementasikan
@@ -77,6 +81,25 @@ Tidak ada spike yang otomatis dianggap PASS hanya karena kodenya ada di repo ata
 - S15 MOGRT insertion via `SequenceEditor.insertMogrtFromPath()` + component inspection
 - S16 package-readiness static check + prosedur manual UDT → `.ccx` → install → smoke test
 
+## Verification Kit Windows
+
+Untuk mengurangi setup manual, repo sekarang menyediakan:
+
+- `scripts/windows/START_FOUNDATION_VERIFICATION.cmd`
+- `scripts/windows/New-AAVCFoundationFixture.ps1`
+- `scripts/windows/Collect-AAVCFoundationEnvironment.ps1`
+
+Double-click `START_FOUNDATION_VERIFICATION.cmd` dari clone repo. Tool ini akan:
+
+1. membuat fixture PNG `A001.png`, `A002.png`, `A003.png` di `.aavc-foundation-test/assets`;
+2. membuat folder `results` dan `exports`;
+3. mengumpulkan informasi environment Windows/Premiere yang dapat dideteksi;
+4. menjalankan `npm run check`.
+
+Folder `.aavc-foundation-test/` masuk `.gitignore` agar hasil test lokal tidak ikut ter-commit.
+
+Panel v0.0.6 juga memiliki **Verification Report exporter**. Setelah S01–S16 dijalankan, pilih `.aavc-foundation-test/results` lalu klik `Export Full Report`. Plugin menyimpan JSON lengkap dan TXT summary serta menghitung gate `GO_CANDIDATE` / `NO_GO` berdasarkan spike P0.
+
 ## Gate sebelum Tahap 02
 
 **Jangan mulai Core Architecture production hanya berdasarkan static check.**
@@ -93,13 +116,18 @@ S13–S16 boleh memiliki limitation yang tidak memblokir composer dasar, tetapi 
 
 ## Cara test foundation
 
-1. Gunakan project TEST.
-2. Premiere 25.6+ → enable Developer Mode.
-3. UXP Developer Tool 2.2+ → Add Plugin → `uxp/manifest.json`.
-4. Load plugin.
-5. Premiere → Window → UXP Plugins → AI Automatic Video Composer.
-6. Jalankan S01 → S16 sesuai `uxp/README.md`.
-7. Isi result sheet di `docs/spike-results/`.
+Cara yang disarankan:
+
+1. Clone/download repo.
+2. Double-click `scripts/windows/START_FOUNDATION_VERIFICATION.cmd`.
+3. Buka `docs/02_FOUNDATION_VERIFICATION_RUNBOOK.md`.
+4. Gunakan project Premiere TEST.
+5. UXP Developer Tool → Add Plugin → `uxp/manifest.json`.
+6. Load plugin.
+7. Premiere → Window → UXP Plugins → AI Automatic Video Composer.
+8. Jalankan S01 → S16 sesuai runbook.
+9. Export Full Report ke `.aavc-foundation-test/results`.
+10. Gunakan report itu untuk keputusan GO/NO-GO Tahap 02.
 
 ## Security / permission note
 
@@ -112,7 +140,7 @@ npm run check
 ```
 
 CI mengecek:
-- syntax `main.js`, `batch-c.js`, `batch-d.js`, `batch-e.js`;
+- syntax `main.js`, `batch-c.js`, `batch-d.js`, `batch-e.js`, `verification.js`;
 - manifest foundation;
 - package readiness dasar.
 
