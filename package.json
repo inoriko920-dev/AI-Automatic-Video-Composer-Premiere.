@@ -1,0 +1,14 @@
+{
+  "name": "ai-automatic-video-composer-premiere-foundation",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Static validation helpers for the Premiere UXP foundation.",
+  "scripts": {
+    "check:syntax": "node --check uxp/main.js",
+    "check:manifest": "node scripts/validate-manifest.mjs",
+    "check": "npm run check:syntax && npm run check:manifest"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
