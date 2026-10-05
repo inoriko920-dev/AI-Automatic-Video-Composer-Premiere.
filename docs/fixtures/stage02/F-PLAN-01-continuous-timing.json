@@ -1,0 +1,20 @@
+{
+  "fixtureVersion": 1,
+  "fixtureId": "F-PLAN-01",
+  "inputScenes": [
+    {"sceneId": "SCN-001-test", "assetIds": ["A001"], "layout": "SINGLE", "durationSeconds": 3},
+    {"sceneId": "SCN-002-test", "assetIds": ["A002"], "layout": "SINGLE", "durationSeconds": 4},
+    {"sceneId": "SCN-003-test", "assetIds": ["A003"], "layout": "SINGLE", "durationSeconds": 5}
+  ],
+  "expectedItems": [
+    {"sceneId": "SCN-001-test", "track": "V1", "startSeconds": 0, "endSeconds": 3},
+    {"sceneId": "SCN-002-test", "track": "V1", "startSeconds": 3, "endSeconds": 7},
+    {"sceneId": "SCN-003-test", "track": "V1", "startSeconds": 7, "endSeconds": 12}
+  ],
+  "assertions": {
+    "totalDurationSeconds": 12,
+    "noOverlap": true,
+    "noGap": true,
+    "deterministic": true
+  }
+}
