@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+out/
+coverage/
+*.ccx
+*.zip
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+secrets/
+
+# Logs
+*.log
+logs/
+
+# IDE / OS
+.vscode/*.local.json
+.idea/
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Temporary files
+.tmp/
+tmp/
+temp/
+*.tmp
+*.bak
+
+# Adobe / test generated output
+exports/
+render-output/
+spike-output/
+
+# TypeScript caches
+*.tsbuildinfo
