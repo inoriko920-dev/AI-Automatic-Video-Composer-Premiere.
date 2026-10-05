@@ -30,9 +30,23 @@ Atau Windows: drag report JSON ke:
    - S10;
    - S11;
    - S12.
-5. Simpan report sumber, review JSON, dan screenshot kegagalan/limitasi bila ada.
-6. Bila keputusan `GO_CANDIDATE*`, lakukan human/agent review.
-7. Baru setelah review eksplisit, update `docs/foundation-gate.json` ke `GO_APPROVED` dan isi `evidenceReport`.
+5. Buat Evidence Bundle Windows bila ingin menyimpan/mengirim satu file ZIP. Drag report JSON ke:
+
+`scripts/windows/BUILD_FOUNDATION_EVIDENCE_BUNDLE.cmd`
+
+Script tersebut akan:
+- memastikan review JSON tersedia;
+- mempertahankan report asli;
+- menyertakan `windows-environment.json` bila ditemukan;
+- membuat `EVIDENCE_MANIFEST.json`;
+- menghitung SHA-256 setiap file bukti;
+- membuat `aavc-foundation-evidence-<timestamp>.zip` di `.aavc-foundation-test/evidence`.
+
+Evidence bundle boleh dibuat juga saat keputusan `NO_GO`; kegagalan tetap harus dapat diaudit.
+
+6. Simpan screenshot bila ada FAIL atau PASS_WITH_LIMIT yang membutuhkan konteks visual.
+7. Bila keputusan `GO_CANDIDATE*`, lakukan human/agent review.
+8. Baru setelah review eksplisit, update `docs/foundation-gate.json` ke `GO_APPROVED` dan isi `evidenceReport`.
 
 ## Bukti minimum untuk membuka gate
 
@@ -44,6 +58,8 @@ Atau Windows: drag report JSON ke:
 - status S07/S08/S10/S11/S12;
 - limitation/ADR bila S10 memakai fallback;
 - catatan reviewer.
+
+Evidence ZIP adalah convenience artifact; sumber keputusan tetap report + review JSON yang ada di dalamnya.
 
 ## Yang tidak boleh dilakukan
 
