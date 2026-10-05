@@ -1,4 +1,4 @@
-# UXP Foundation — Batch A + B (S01–S06)
+# UXP Foundation — Batch A + B + C (S01–S08)
 
 Folder ini adalah plugin UXP diagnostic untuk membuktikan fondasi sebelum engine composer production dibuat.
 
@@ -9,7 +9,7 @@ Folder ini adalah plugin UXP diagnostic untuk membuktikan fondasi sebelum engine
 - Windows 11 sebagai environment development pertama.
 
 ## Kenapa JavaScript murni dulu?
-Foundation sengaja belum memakai bundler atau TypeScript. Tujuannya memperkecil permukaan error saat membuktikan manifest, lifecycle, host/version API, filesystem, Project DOM, import media, dan sequence creation. Setelah spike P0 terverifikasi, kode dapat direfactor ke TypeScript production.
+Foundation sengaja belum memakai bundler atau TypeScript. Tujuannya memperkecil permukaan error saat membuktikan manifest, lifecycle, host/version API, filesystem, Project DOM, import media, sequence creation, timeline placement, dan timing. Setelah spike P0 terverifikasi, kode dapat direfactor ke TypeScript production.
 
 ## Cara load di UXP Developer Tool
 1. Buka Adobe Premiere Pro.
@@ -24,7 +24,7 @@ Foundation sengaja belum memakai bundler atau TypeScript. Tujuannya memperkecil 
 ## Gunakan PROJECT TEST
 S01–S04 aman/read-only kecuali state plugin S03.
 
-**S05 dan S06 memodifikasi project Premiere. Jangan gunakan project produksi untuk spike ini.**
+**S05–S08 memodifikasi project Premiere. Jangan gunakan project produksi untuk spike ini.**
 
 ---
 
@@ -60,57 +60,70 @@ S01–S04 aman/read-only kecuali state plugin S03.
 2. Klik `Run S04`.
 3. Pastikan project name/GUID/path muncul.
 4. Pastikan root, insertion bin, sequence count, active sequence dan root child count masuk akal.
-5. S04 tetap harus aman jika project belum mempunyai active sequence.
 
 ### S05 — Bin + Import Axxx
-**Probe ini memodifikasi project.**
-
 1. Jalankan S03 folder picker lebih dulu.
 2. Pastikan minimal dua canonical asset tersedia.
 3. Klik `Run S05 · Import Probe`.
 4. Plugin membuat/memakai bin `AAVC_GENERATED`.
-5. Plugin mengimport dua aset pertama dua kali untuk mengamati duplicate behavior Premiere.
-6. Lihat JSON hasil:
-   - `matchingClipsBefore`
-   - `matchingClipsAfterFirst`
-   - `matchingClipsAfterSecond`
-   - `duplicateDelta`
-7. Jika `duplicateDelta > 0`, status `PASS_WITH_LIMIT` adalah hasil valid untuk spike; artinya production layer wajib mempunyai anti-duplicate binder sendiri.
-
-Pembuatan bin memakai Action di dalam `Project.lockedAccess()` dan `Project.executeTransaction()` agar mengikuti aturan API Premiere terbaru.
+5. Plugin mengimport dua aset pertama dua kali untuk mengamati duplicate behavior.
+6. Jika `duplicateDelta > 0`, `PASS_WITH_LIMIT` valid; production binder wajib mempunyai anti-duplikasi sendiri.
 
 ### S06 — Sequence Creation
-**Probe ini memodifikasi project.**
-
 1. Jalankan S05 terlebih dahulu.
-2. Pastikan sequence `AAVC_SPIKE_S06` belum ada jika ingin membuktikan creation dari nol.
-3. Klik `Run S06 · Create Sequence`.
-4. Plugin memakai `Project.createSequenceFromMedia()` karena tersedia sejak Premiere 25.6.
-5. Pastikan sequence muncul dan dapat dibuka.
-6. Pastikan panel menampilkan jumlah V/A track, frame size, timebase, dan end time.
-7. Lihat timeline secara manual dan konfirmasi dua media hasil S05 ikut membentuk sequence.
-8. Jika sequence sudah ada dari percobaan sebelumnya, probe memakai readback/reuse dan memberi `PASS_WITH_LIMIT`; hapus sequence test untuk re-prove creation.
+2. Klik `Run S06 · Create Sequence`.
+3. Plugin memakai `Project.createSequenceFromMedia()`.
+4. Pastikan `AAVC_SPIKE_S06` muncul dan metadata sequence terbaca.
 
-`createSequenceWithPresetPath()` sengaja bukan dependency MVP karena baru tersedia mulai Premiere 26.3.
+---
+
+## Batch C
+
+### S07 — Timeline Placement V1/V2
+**Blocker MVP.**
+
+1. Pastikan S05 sudah berhasil dan bin `AAVC_GENERATED` memiliki A001/A002.
+2. Klik `Run S07 · Place A001/A002`.
+3. Plugin membuat/memakai sequence `AAVC_SPIKE_S07_S08`.
+4. A001 harus berada di **V1 @ 0.000 s**.
+5. A002 harus berada di **V2 @ 1.000 s**.
+6. Plugin memakai `SequenceEditor.createInsertProjectItemAction()` untuk A002.
+7. Hasil dibaca kembali dari DOM melalui `VideoTrack.getTrackItems()` + TrackItem timing.
+8. Bila placement lama sudah benar dari run sebelumnya, probe tidak menduplikasi A002 dan dapat memberi `PASS_WITH_LIMIT`.
+
+Untuk pembuktian creation dari nol lagi, hapus sequence `AAVC_SPIKE_S07_S08` pada project TEST lalu jalankan ulang.
+
+### S08 — Timing & Duration
+**Blocker MVP.**
+
+1. Jalankan S07 terlebih dahulu.
+2. Klik `Run S08 · Set 3s / 5s`.
+3. Target A001: start 0 s, end 3 s, duration 3 s.
+4. Target A002: start 1 s, end 6 s, duration 5 s.
+5. Dua `createSetEndAction()` dijalankan dalam satu transaction.
+6. Panel membaca kembali start/end/duration dari Premiere DOM.
+7. PASS hanya jika semua nilai berada dalam toleransi maksimum **1 frame**.
+8. Toleransi frame baseline dihitung dari `Sequence.getTimebase()`; host lebih baru dapat memakai frame-rate API tambahan sebagai fallback.
 
 ---
 
 ## Kriteria status
-- `PASS`: probe runtime berhasil sesuai kriteria yang dapat diverifikasi panel.
-- `PASS_WITH_LIMIT`: inti berhasil tetapi ada limitation atau bukti manual yang belum lengkap.
-- `FAIL`: API/runtime gagal.
+- `PASS`: probe runtime berhasil sesuai kriteria panel/readback.
+- `PASS_WITH_LIMIT`: inti berhasil tetapi ada limitation, rerun reuse, atau bukti manual yang belum lengkap.
+- `FAIL`: API/runtime gagal atau readback tidak sesuai target.
 - `BLOCKED_BY_VERSION`: host tidak memenuhi baseline.
 
 ## Catat hasil
 Status panel bukan bukti tunggal. Isi record di:
 - `docs/spike-results/S01-S03_BATCH_A.md`
 - `docs/spike-results/S04-S06_BATCH_B.md`
+- `docs/spike-results/S07-S08_BATCH_C.md`
 
-Catat versi Premiere, UXP runtime, Windows, commit plugin, langkah manual, readback, limitation, dan keputusan arsitektur.
+Catat versi Premiere, UXP runtime, Windows, commit plugin, readback, limitation, dan keputusan arsitektur.
 
-## Setelah S06
-Jangan langsung masuk parser DOCX production. Urutan berikutnya:
+## Setelah S08
+Jika S07 dan S08 terbukti PASS di Premiere nyata, lanjutkan:
 
-**S07 Timeline Placement → S08 Timing/Duration → S09 Motion → S10 Keyframe → S11 Transaction/Undo.**
+**S09 Motion Parameter Discovery → S10 Keyframe Animation → S11 Transaction/Undo.**
 
-S07, S08, dan S11 adalah blocker MVP utama.
+S11 tetap blocker utama sebelum composer production dibuat.
