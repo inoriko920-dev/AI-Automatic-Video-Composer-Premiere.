@@ -1,0 +1,21 @@
+{
+  "fixtureVersion": 1,
+  "fixtureId": "F-DOCX-05",
+  "expectedIssues": [
+    {
+      "code": "DOCX_UNKNOWN_LAYOUT",
+      "severity": "ERROR",
+      "scope": "DOCX"
+    },
+    {
+      "code": "DOCX_INVALID_DURATION",
+      "severity": "ERROR",
+      "scope": "DOCX"
+    }
+  ],
+  "assertions": {
+    "mutationBlocked": true,
+    "noSilentLayoutFallback": true,
+    "noSilentDurationClamp": true
+  }
+}
