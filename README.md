@@ -4,13 +4,13 @@ Plugin Adobe Premiere Pro untuk menyusun video naratif/infografis secara otomati
 
 ## Status proyek
 
-**Tahap 00 selesai. Tahap 01 Foundation/API Spike: S01–S16 sudah IMPLEMENTED, tetapi belum VERIFIED penuh di Premiere nyata.**
+**Tahap 00 selesai. Tahap 01 Foundation/API Spike: S01–S16 sudah IMPLEMENTED, tetapi belum VERIFIED penuh di Premiere nyata. Tahap 02 sudah READY TO PLAN, tetapi NOT READY TO IMPLEMENT sampai Foundation Gate lolos.**
 
 Foundation test build saat ini: **v0.0.6**.
 
 Repo memakai aturan:
 
-`implement → static validate → verify di Premiere nyata → dokumentasikan limitation → baru promote ke production architecture`
+`implement spike → static validate → verify di Premiere nyata → dokumentasikan limitation → baru promote ke production architecture`
 
 Tidak ada spike yang otomatis dianggap PASS hanya karena kodenya ada di repo atau GitHub Actions hijau.
 
@@ -45,6 +45,8 @@ Tidak ada spike yang otomatis dianggap PASS hanya karena kodenya ada di repo ata
 - `docs/00_MASTER_PLAN_AI_AUTOMATIC_VIDEO_COMPOSER_PREMIERE.md`
 - `docs/01_UXP_FOUNDATION_API_SPIKE_PLAN.md`
 - `docs/02_FOUNDATION_VERIFICATION_RUNBOOK.md`
+- `docs/03_STAGE_02_CORE_ARCHITECTURE_PRODUCTION_PLAN.md`
+- `docs/adr/0001-foundation-gate-before-production.md`
 - `docs/spike-results/S01-S03_BATCH_A.md`
 - `docs/spike-results/S04-S06_BATCH_B.md`
 - `docs/spike-results/S07-S08_BATCH_C.md`
@@ -83,7 +85,7 @@ Tidak ada spike yang otomatis dianggap PASS hanya karena kodenya ada di repo ata
 
 ## Verification Kit Windows
 
-Untuk mengurangi setup manual, repo sekarang menyediakan:
+Untuk mengurangi setup manual, repo menyediakan:
 
 - `scripts/windows/START_FOUNDATION_VERIFICATION.cmd`
 - `scripts/windows/New-AAVCFoundationFixture.ps1`
@@ -102,17 +104,42 @@ Panel v0.0.6 juga memiliki **Verification Report exporter**. Setelah S01–S16 d
 
 ## Gate sebelum Tahap 02
 
-**Jangan mulai Core Architecture production hanya berdasarkan static check.**
+**Jangan mulai Core Architecture production hanya berdasarkan static check.** Keputusan ini dikunci oleh `ADR-0001`.
 
 Minimal harus dibuktikan pada Premiere nyata:
 
 1. S07 — placement benar.
 2. S08 — timing/duration presisi.
-3. S10 — keyframe benar-benar muncul pada DOM/timeline atau limitation terdokumentasi dalam ADR.
+3. S10 — keyframe benar-benar muncul pada DOM/timeline atau limitation terdokumentasi dalam ADR fallback.
 4. S11 — dua mutation dapat dibalik dengan satu Undo.
 5. S12 — identity tetap dikenali setelah reload/restart.
 
 S13–S16 boleh memiliki limitation yang tidak memblokir composer dasar, tetapi hasilnya harus dicatat.
+
+## Tahap 02 — sudah dirancang, belum diimplementasikan
+
+Blueprint production ada di `docs/03_STAGE_02_CORE_ARCHITECTURE_PRODUCTION_PLAN.md`.
+
+Desain tersebut sudah mengunci:
+- TypeScript strict + production build layer;
+- pemisahan `domain / ports / infrastructure / presentation`;
+- Scene DOCX parser contract;
+- canonical `Axxx` binder;
+- `ComposerPlan` sebelum mutation;
+- Premiere adapter boundary;
+- capability registry;
+- stable identity + state schema;
+- deterministic SINGLE/DOUBLE layout;
+- unified Premiere time conversion;
+- transaction/readback rules;
+- idempotent rerun + three-way user-edit protection;
+- Validation Center error codes;
+- fixture F01–F10;
+- implementasi Batch P0–P8.
+
+Status resmi Tahap 02 tetap:
+
+**READY TO PLAN / NOT READY TO IMPLEMENT**.
 
 ## Cara test foundation
 
@@ -148,13 +175,8 @@ Static validation tidak menggantikan test Premiere/AME/CCX nyata.
 
 ## Langkah berikutnya
 
-Setelah Tahap 01 diverifikasi, masuk **Tahap 02 — Core Architecture Production**:
-
-- TypeScript foundation;
-- Premiere adapter layer;
-- project/composer state;
-- Scene DOCX parser;
-- `Axxx` binder;
-- deterministic timeline composer;
-- validation + rerun safety;
-- baru kemudian motion registry, subtitle, Gemini, dan export workflow.
+1. Jalankan Foundation Verification Kit v0.0.6 di Windows/Premiere nyata.
+2. Review `aavc-foundation-report-*.json`.
+3. Jika gate GO → ubah Tahap 02 menjadi READY TO IMPLEMENT.
+4. Mulai **Batch P0 — Production TypeScript Skeleton** sesuai dokumen Tahap 02.
+5. Jika blocker gagal → perbaiki foundation terlebih dahulu dan jangan membuat workaround tersembunyi di production.
