@@ -10,12 +10,14 @@ Urutan baca:
 2. `06_AXXX_ASSET_BINDER_CONTRACT.md`
 3. `07_COMPOSER_PLAN_PROJECT_STATE_SCHEMA.md`
 4. `08_VALIDATION_ERROR_CATALOG.md`
+5. `09_FOUNDATION_REPORT_REVIEW_CONTRACT.md`
 
 Kontrak ini melengkapi:
 - `docs/03_STAGE_02_CORE_ARCHITECTURE_PRODUCTION_PLAN.md`
 - `docs/04_STAGE_02_EXECUTION_CHECKLIST_ASTRA_SOL.md`
 - `docs/adr/0001-foundation-gate-before-production.md`
 - `docs/adr/0002-preserve-user-edits-on-rerun.md`
+- `docs/evidence/README.md`
 
 Aturan utama:
 - parser/binder/domain logic tidak bergantung pada Premiere runtime;
@@ -24,4 +26,6 @@ Aturan utama:
 - stable IDs tidak bergantung pada track index;
 - rerun memakai three-way comparison;
 - edit manual user protected by default;
-- validation codes stabil dan dapat diuji.
+- validation codes stabil dan dapat diuji;
+- Foundation Gate hanya boleh dibuka dari evidence real-host yang sudah direview dan di-hash;
+- report reviewer tidak pernah auto-approve `docs/foundation-gate.json`.
