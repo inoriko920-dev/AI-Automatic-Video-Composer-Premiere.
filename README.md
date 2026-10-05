@@ -4,7 +4,7 @@ Plugin Adobe Premiere Pro untuk menyusun video naratif/infografis secara otomati
 
 ## Status proyek
 
-**Fase saat ini: Tahap 00 selesai / Tahap 01 sedang berjalan / Batch A S01–S03 dan Batch B S04–S06 sudah diimplementasikan, tetapi belum diverifikasi di Premiere nyata.**
+**Fase saat ini: Tahap 00 selesai / Tahap 01 sedang berjalan / Batch A S01–S03, Batch B S04–S06, dan Batch C S07–S08 sudah diimplementasikan, tetapi belum diverifikasi di Premiere nyata.**
 
 Repo memakai pola **implement → verify di host nyata → baru promote ke production architecture**. Kode probe tidak otomatis dianggap PASS hanya karena sudah ada di repo atau static check GitHub berhasil.
 
@@ -42,7 +42,8 @@ Baseline teknis:
 4. [`docs/spike-results/README.md`](docs/spike-results/README.md) — format hasil setiap API spike.
 5. [`docs/spike-results/S01-S03_BATCH_A.md`](docs/spike-results/S01-S03_BATCH_A.md) — record Batch A.
 6. [`docs/spike-results/S04-S06_BATCH_B.md`](docs/spike-results/S04-S06_BATCH_B.md) — record Batch B.
-7. [`uxp/README.md`](uxp/README.md) — cara load dan menguji plugin foundation.
+7. [`docs/spike-results/S07-S08_BATCH_C.md`](docs/spike-results/S07-S08_BATCH_C.md) — record Batch C.
+8. [`uxp/README.md`](uxp/README.md) — cara load dan menguji plugin foundation.
 
 ## Foundation yang sudah diimplementasikan
 
@@ -56,9 +57,13 @@ Baseline teknis:
 - **S05 Bin + Import Media** — membuat/memakai bin `AAVC_GENERATED`, import dua canonical asset, readback sebagai ClipProjectItem, dan mengamati duplicate behavior.
 - **S06 Sequence Creation** — membuat `AAVC_SPIKE_S06` melalui `Project.createSequenceFromMedia()` dan membaca metadata sequence kembali.
 
-Pembuatan bin memakai `Project.lockedAccess()` + `Project.executeTransaction()` agar Action dibuat di scope yang aman dan masuk Undo history secara logis.
+### Batch C — S07–S08
+- **S07 Timeline Placement** — sequence khusus `AAVC_SPIKE_S07_S08`, A001 di V1 @ 0 s, A002 di V2 @ 1 s, menggunakan `SequenceEditor.createInsertProjectItemAction()` dan DOM readback.
+- **S08 Timing & Duration** — A001 ditargetkan 3 s, A002 ditargetkan 5 s menggunakan `VideoClipTrackItem.createSetEndAction()` dalam satu transaction, lalu diverifikasi lewat `getStartTime()`, `getEndTime()`, dan `getDuration()` dengan toleransi maksimum 1 frame.
 
-`createSequenceWithPresetPath()` tidak menjadi dependency MVP karena baru tersedia mulai Premiere 26.3; baseline S06 memakai API yang tersedia sejak 25.6.
+Pembuatan bin dan mutasi timeline memakai `Project.lockedAccess()` + `Project.executeTransaction()` agar Action dibuat di scope yang aman dan masuk Undo history secara logis.
+
+`createSequenceWithPresetPath()` tidak menjadi dependency MVP karena baru tersedia mulai Premiere 26.3; baseline menggunakan API yang tersedia sejak 25.6.
 
 ## Cara test
 
@@ -68,10 +73,10 @@ Pembuatan bin memakai `Project.lockedAccess()` + `Project.executeTransaction()` 
 4. Add Plugin → pilih `uxp/manifest.json`.
 5. Load plugin.
 6. Premiere → `Window > UXP Plugins > AI Automatic Video Composer`.
-7. Jalankan S01 → S02 → S03 → S04 → S05 → S06.
+7. Jalankan S01 → S02 → S03 → S04 → S05 → S06 → S07 → S08.
 8. Isi hasil nyata di `docs/spike-results/`.
 
-S05 dan S06 memodifikasi project test.
+S05–S08 memodifikasi project test.
 
 ## Prinsip implementasi
 
@@ -100,8 +105,8 @@ Jika salah satu gagal tanpa fallback yang layak, arsitektur harus diselesaikan l
 
 ## Langkah berikutnya
 
-Setelah Batch A/B diuji di Premiere nyata, lanjutkan:
+Setelah S07/S08 diverifikasi di Premiere nyata, lanjutkan:
 
-**S07 Timeline Placement → S08 Timing/Duration → S09 Motion → S10 Keyframe → S11 Transaction/Undo.**
+**S09 Motion Parameter Discovery → S10 Keyframe Animation → S11 Transaction/Undo.**
 
 Jangan mulai parser DOCX production sebelum blocker S07/S08/S11 mempunyai jalur yang terbukti.
