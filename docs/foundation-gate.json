@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "status": "NO_GO_PENDING_RUNTIME_VERIFICATION",
+  "foundationBuild": "0.0.6",
+  "requiredPass": ["S07", "S08", "S11", "S12"],
+  "requiredPassOrFallbackAdr": ["S10"],
+  "evidenceReport": null,
+  "approvedAt": null,
+  "approvedBy": null,
+  "notes": "Stage 02 production source must not be introduced until a real-host verification report is reviewed and this file is explicitly changed to GO_APPROVED."
+}
