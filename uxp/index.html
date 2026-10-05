@@ -9,148 +9,106 @@
   <main class="app-shell">
     <header class="app-header">
       <div>
-        <div class="eyebrow">FOUNDATION / BATCH A + B + C</div>
+        <div class="eyebrow">FOUNDATION / BATCH A + B + C + D</div>
         <h1>AI Automatic Video Composer</h1>
-        <p class="muted">UXP Diagnostics · S01–S08</p>
+        <p class="muted">UXP Diagnostics · S01–S11</p>
       </div>
       <span id="overallBadge" class="badge badge-neutral">NOT RUN</span>
     </header>
 
     <section class="card">
-      <div class="section-title-row">
-        <h2>S01 · Plugin Boot & Panel</h2>
-        <span id="s01Badge" class="badge badge-neutral">NOT RUN</span>
-      </div>
+      <div class="section-title-row"><h2>S01 · Plugin Boot & Panel</h2><span id="s01Badge" class="badge badge-neutral">NOT RUN</span></div>
       <p class="muted">Membuktikan panel, lifecycle, reload, dan runtime dasar.</p>
-      <div class="grid two-cols">
-        <div class="kv"><span>Plugin</span><strong id="pluginVersion">—</strong></div>
-        <div class="kv"><span>Panel lifecycle</span><strong id="panelLifecycle">—</strong></div>
-      </div>
+      <div class="grid two-cols"><div class="kv"><span>Plugin</span><strong id="pluginVersion">—</strong></div><div class="kv"><span>Panel lifecycle</span><strong id="panelLifecycle">—</strong></div></div>
       <button id="runS01" class="primary">Run S01</button>
     </section>
 
     <section class="card">
-      <div class="section-title-row">
-        <h2>S02 · Host & Version Gate</h2>
-        <span id="s02Badge" class="badge badge-neutral">NOT RUN</span>
-      </div>
+      <div class="section-title-row"><h2>S02 · Host & Version Gate</h2><span id="s02Badge" class="badge badge-neutral">NOT RUN</span></div>
       <div class="grid two-cols diagnostics-grid">
-        <div class="kv"><span>Host</span><strong id="hostName">—</strong></div>
-        <div class="kv"><span>Premiere</span><strong id="hostVersion">—</strong></div>
-        <div class="kv"><span>UXP</span><strong id="uxpVersion">—</strong></div>
-        <div class="kv"><span>OS</span><strong id="osInfo">—</strong></div>
-        <div class="kv"><span>Architecture</span><strong id="archInfo">—</strong></div>
-        <div class="kv"><span>Locale</span><strong id="localeInfo">—</strong></div>
+        <div class="kv"><span>Host</span><strong id="hostName">—</strong></div><div class="kv"><span>Premiere</span><strong id="hostVersion">—</strong></div>
+        <div class="kv"><span>UXP</span><strong id="uxpVersion">—</strong></div><div class="kv"><span>OS</span><strong id="osInfo">—</strong></div>
+        <div class="kv"><span>Architecture</span><strong id="archInfo">—</strong></div><div class="kv"><span>Locale</span><strong id="localeInfo">—</strong></div>
       </div>
-      <div id="versionMessage" class="notice">Minimum Premiere Pro: 25.6.0</div>
-      <button id="runS02">Run S02</button>
+      <div id="versionMessage" class="notice">Minimum Premiere Pro: 25.6.0</div><button id="runS02">Run S02</button>
     </section>
 
     <section class="card">
-      <div class="section-title-row">
-        <h2>S03 · Filesystem Access</h2>
-        <span id="s03Badge" class="badge badge-neutral">NOT RUN</span>
-      </div>
-      <div class="button-row">
-        <button id="pickImage">Pilih PNG</button>
-        <button id="pickFolder">Pilih Folder Aset</button>
-      </div>
-      <div class="result-box">
-        <div><span class="label">File:</span> <span id="pickedFile">belum dipilih</span></div>
-        <div><span class="label">Folder:</span> <span id="pickedFolder">belum dipilih</span></div>
-        <div><span class="label">Axxx terdeteksi:</span> <span id="assetCount">0</span></div>
-        <div id="assetPreview" class="asset-preview"></div>
-      </div>
-      <div class="button-row">
-        <button id="writeState">Tulis State Test</button>
-        <button id="readState">Baca State Test</button>
-      </div>
-      <pre id="statePreview" class="code-box">Belum ada state.</pre>
-      <button id="runS03" class="primary">Run S03 Summary</button>
+      <div class="section-title-row"><h2>S03 · Filesystem Access</h2><span id="s03Badge" class="badge badge-neutral">NOT RUN</span></div>
+      <div class="button-row"><button id="pickImage">Pilih PNG</button><button id="pickFolder">Pilih Folder Aset</button></div>
+      <div class="result-box"><div><span class="label">File:</span> <span id="pickedFile">belum dipilih</span></div><div><span class="label">Folder:</span> <span id="pickedFolder">belum dipilih</span></div><div><span class="label">Axxx terdeteksi:</span> <span id="assetCount">0</span></div><div id="assetPreview" class="asset-preview"></div></div>
+      <div class="button-row"><button id="writeState">Tulis State Test</button><button id="readState">Baca State Test</button></div>
+      <pre id="statePreview" class="code-box">Belum ada state.</pre><button id="runS03" class="primary">Run S03 Summary</button>
     </section>
 
     <section class="card">
-      <div class="section-title-row">
-        <h2>S04 · Active Project</h2>
-        <span id="s04Badge" class="badge badge-neutral">NOT RUN</span>
-      </div>
+      <div class="section-title-row"><h2>S04 · Active Project</h2><span id="s04Badge" class="badge badge-neutral">NOT RUN</span></div>
       <p class="muted">Read-only probe: project aktif, root, insertion bin, sequence, dan project tree.</p>
       <div class="grid two-cols diagnostics-grid">
-        <div class="kv"><span>Project</span><strong id="projectName">—</strong></div>
-        <div class="kv"><span>GUID</span><strong id="projectGuid">—</strong></div>
-        <div class="kv"><span>Root</span><strong id="rootItemName">—</strong></div>
-        <div class="kv"><span>Insertion bin</span><strong id="insertionBinName">—</strong></div>
-        <div class="kv"><span>Sequences</span><strong id="sequenceCount">—</strong></div>
-        <div class="kv"><span>Active sequence</span><strong id="activeSequenceName">—</strong></div>
-        <div class="kv"><span>Root children</span><strong id="rootChildCount">—</strong></div>
-        <div class="kv"><span>Project path</span><strong id="projectPath">—</strong></div>
-      </div>
-      <button id="runS04" class="primary">Run S04</button>
+        <div class="kv"><span>Project</span><strong id="projectName">—</strong></div><div class="kv"><span>GUID</span><strong id="projectGuid">—</strong></div>
+        <div class="kv"><span>Root</span><strong id="rootItemName">—</strong></div><div class="kv"><span>Insertion bin</span><strong id="insertionBinName">—</strong></div>
+        <div class="kv"><span>Sequences</span><strong id="sequenceCount">—</strong></div><div class="kv"><span>Active sequence</span><strong id="activeSequenceName">—</strong></div>
+        <div class="kv"><span>Root children</span><strong id="rootChildCount">—</strong></div><div class="kv"><span>Project path</span><strong id="projectPath">—</strong></div>
+      </div><button id="runS04" class="primary">Run S04</button>
     </section>
 
     <section class="card">
-      <div class="section-title-row">
-        <h2>S05 · Bin + Import Axxx</h2>
-        <span id="s05Badge" class="badge badge-neutral">NOT RUN</span>
-      </div>
+      <div class="section-title-row"><h2>S05 · Bin + Import Axxx</h2><span id="s05Badge" class="badge badge-neutral">NOT RUN</span></div>
       <div class="notice warn">MUTATES TEST PROJECT: membuat/memakai bin AAVC_GENERATED lalu mengimport dua aset pertama dua kali untuk mengamati duplicate behavior.</div>
-      <p class="muted">Jalankan S03 folder picker dan S04 terlebih dahulu. Gunakan project TEST.</p>
-      <button id="runS05" class="primary">Run S05 · Import Probe</button>
-      <pre id="s05Result" class="code-box">Belum ada hasil.</pre>
+      <p class="muted">Jalankan S03 folder picker dan S04 terlebih dahulu. Gunakan project TEST.</p><button id="runS05" class="primary">Run S05 · Import Probe</button><pre id="s05Result" class="code-box">Belum ada hasil.</pre>
     </section>
 
     <section class="card">
-      <div class="section-title-row">
-        <h2>S06 · Sequence Creation</h2>
-        <span id="s06Badge" class="badge badge-neutral">NOT RUN</span>
-      </div>
+      <div class="section-title-row"><h2>S06 · Sequence Creation</h2><span id="s06Badge" class="badge badge-neutral">NOT RUN</span></div>
       <div class="notice warn">MUTATES TEST PROJECT: membuat sequence AAVC_SPIKE_S06 dari dua ClipProjectItem hasil S05.</div>
-      <div class="grid two-cols">
-        <div class="kv"><span>Sequence</span><strong id="createdSequenceName">—</strong></div>
-        <div class="kv"><span>Tracks</span><strong id="createdSequenceTracks">—</strong></div>
-      </div>
-      <button id="runS06" class="primary">Run S06 · Create Sequence</button>
-      <pre id="s06Result" class="code-box">Belum ada hasil.</pre>
+      <div class="grid two-cols"><div class="kv"><span>Sequence</span><strong id="createdSequenceName">—</strong></div><div class="kv"><span>Tracks</span><strong id="createdSequenceTracks">—</strong></div></div>
+      <button id="runS06" class="primary">Run S06 · Create Sequence</button><pre id="s06Result" class="code-box">Belum ada hasil.</pre>
     </section>
 
     <section class="card">
-      <div class="section-title-row">
-        <h2>S07 · Timeline Placement V1/V2</h2>
-        <span id="s07Badge" class="badge badge-neutral">NOT RUN</span>
-      </div>
+      <div class="section-title-row"><h2>S07 · Timeline Placement V1/V2</h2><span id="s07Badge" class="badge badge-neutral">NOT RUN</span></div>
       <div class="notice warn">BLOCKER MVP · MUTATES TEST PROJECT: membuat/memakai sequence AAVC_SPIKE_S07_S08, mempertahankan A001 di V1 @ 0s, lalu menaruh A002 di V2 @ 1s.</div>
-      <div class="grid two-cols">
-        <div class="kv"><span>Sequence</span><strong id="s07SequenceName">—</strong></div>
-        <div class="kv"><span>Video tracks</span><strong id="s07Tracks">—</strong></div>
-      </div>
-      <button id="runS07" class="primary">Run S07 · Place A001/A002</button>
-      <pre id="s07Result" class="code-box">Belum ada hasil.</pre>
+      <div class="grid two-cols"><div class="kv"><span>Sequence</span><strong id="s07SequenceName">—</strong></div><div class="kv"><span>Video tracks</span><strong id="s07Tracks">—</strong></div></div>
+      <button id="runS07" class="primary">Run S07 · Place A001/A002</button><pre id="s07Result" class="code-box">Belum ada hasil.</pre>
     </section>
 
     <section class="card">
-      <div class="section-title-row">
-        <h2>S08 · Timing & Duration</h2>
-        <span id="s08Badge" class="badge badge-neutral">NOT RUN</span>
-      </div>
+      <div class="section-title-row"><h2>S08 · Timing & Duration</h2><span id="s08Badge" class="badge badge-neutral">NOT RUN</span></div>
       <div class="notice warn">BLOCKER MVP · MUTATES TEST PROJECT: A001 ditargetkan 0→3s, A002 1→6s. Readback harus cocok dalam toleransi maksimum 1 frame.</div>
-      <div class="grid two-cols">
-        <div class="kv"><span>A001 timing</span><strong id="s08A001">—</strong></div>
-        <div class="kv"><span>A002 timing</span><strong id="s08A002">—</strong></div>
-      </div>
-      <button id="runS08" class="primary">Run S08 · Set 3s / 5s</button>
-      <pre id="s08Result" class="code-box">Belum ada hasil.</pre>
+      <div class="grid two-cols"><div class="kv"><span>A001 timing</span><strong id="s08A001">—</strong></div><div class="kv"><span>A002 timing</span><strong id="s08A002">—</strong></div></div>
+      <button id="runS08" class="primary">Run S08 · Set 3s / 5s</button><pre id="s08Result" class="code-box">Belum ada hasil.</pre>
     </section>
 
     <section class="card">
-      <div class="section-title-row">
-        <h2>Diagnostics Log</h2>
-        <button id="clearLog" class="small">Clear</button>
-      </div>
+      <div class="section-title-row"><h2>S09 · Motion Parameter Discovery</h2><span id="s09Badge" class="badge badge-neutral">NOT RUN</span></div>
+      <div class="notice warn">MUTATES THEN RESTORES TEST VALUE: enumerasi component chain A001, cari Motion/Position/Scale/Opacity, ubah satu numeric candidate lalu readback dan restore.</div>
+      <div class="grid two-cols"><div class="kv"><span>Motion components</span><strong id="s09Motion">—</strong></div><div class="kv"><span>Scale candidate</span><strong id="s09Scale">—</strong></div></div>
+      <button id="runS09" class="primary">Run S09 · Discover Motion</button><pre id="s09Result" class="code-box">Belum ada hasil.</pre>
+    </section>
+
+    <section class="card">
+      <div class="section-title-row"><h2>S10 · Native Keyframe Animation</h2><span id="s10Badge" class="badge badge-neutral">NOT RUN</span></div>
+      <div class="notice warn">P0 · MUTATES TEST PROJECT: enable time-varying pada numeric Motion candidate A001, tambah keyframe @ 0s dan 2s, lalu wajib lolos DOM readback.</div>
+      <div class="grid two-cols"><div class="kv"><span>Parameter</span><strong id="s10Param">—</strong></div><div class="kv"><span>Key times</span><strong id="s10Keys">—</strong></div></div>
+      <button id="runS10" class="primary">Run S10 · Add 2 Keyframes</button><pre id="s10Result" class="code-box">Belum ada hasil.</pre>
+    </section>
+
+    <section class="card">
+      <div class="section-title-row"><h2>S11 · Transaction & One Undo</h2><span id="s11Badge" class="badge badge-neutral">NOT RUN</span></div>
+      <div class="notice warn">BLOCKER MVP · Dua perubahan timing dimasukkan ke SATU executeTransaction. Setelah Run S11, segera tekan Ctrl+Z SEKALI di Premiere tanpa edit lain, lalu Verify.</div>
+      <div class="grid two-cols"><div class="kv"><span>Transaction</span><strong id="s11Mutation">—</strong></div><div class="kv"><span>Undo verification</span><strong id="s11Undo">—</strong></div></div>
+      <div class="button-row"><button id="runS11" class="primary">Run S11 · Mutate 2 Values</button><button id="verifyS11Undo">Verify S11 Undo</button></div>
+      <pre id="s11Result" class="code-box">Belum ada hasil.</pre>
+    </section>
+
+    <section class="card">
+      <div class="section-title-row"><h2>Diagnostics Log</h2><button id="clearLog" class="small">Clear</button></div>
       <pre id="log" class="log-box"></pre>
     </section>
   </main>
 
   <script src="main.js"></script>
   <script src="batch-c.js"></script>
+  <script src="batch-d.js"></script>
 </body>
 </html>
