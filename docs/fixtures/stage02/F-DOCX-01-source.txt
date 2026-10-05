@@ -1,0 +1,23 @@
+SCENE 001
+TITLE: Pembukaan
+NARRATION:
+Kota itu mulai berubah ketika matahari terbit.
+ASSETS: A001
+LAYOUT: SINGLE
+DURATION: 3.0
+
+SCENE 002
+TITLE: Jalan Utama
+NARRATION:
+Aktivitas perlahan memenuhi jalan utama.
+ASSETS: A002
+LAYOUT: SINGLE
+DURATION: 4.0
+
+SCENE 003
+TITLE: Penutup
+NARRATION:
+Hari pertama berakhir dengan suasana yang lebih tenang.
+ASSETS: A003
+LAYOUT: SINGLE
+DURATION: 5.0
