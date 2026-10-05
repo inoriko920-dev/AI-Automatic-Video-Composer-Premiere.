@@ -1,0 +1,21 @@
+{
+  "fixtureVersion": 1,
+  "fixtureId": "F-AXXX-03",
+  "requiredAssetIds": ["A001"],
+  "folderEntries": [
+    {"name": "A001.png", "readable": true},
+    {"name": "A001.jpg", "readable": true}
+  ],
+  "expectedIssues": [
+    {
+      "code": "ASSET_DUPLICATE_ID",
+      "severity": "ERROR",
+      "scope": "ASSET",
+      "assetId": "A001"
+    }
+  ],
+  "assertions": {
+    "mutationBlocked": true,
+    "binderMustNotChooseOneSilently": true
+  }
+}
